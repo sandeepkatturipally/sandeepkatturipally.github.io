@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kafka Masterclass — Log Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d0f;
+  --panel:#12151a;
+  --panel-2:#171b21;
+  --line:#242a32;
+  --text:#e4e7eb;
+  --muted:#8b95a3;
+  --amber:#e8a33d;
+  --amber-dim:#8a6526;
+  --teal:#3fb8af;
+  --red:#e0665a;
+  --purple:#b98ee8;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+}
+body.light{
+  --bg:#f6f5f1;
+  --panel:#ffffff;
+  --panel-2:#efeee9;
+  --line:#ddd9d0;
+  --text:#1c1c1c;
+  --muted:#5c5c5c;
+}
+::selection{background:var(--amber-dim);color:#fff;}
+a{color:var(--amber);}
+code, pre{font-family:var(--mono);}
+h1,h2,h3,h4{font-family:var(--mono);letter-spacing:-0.01em;margin-top:0;}
+
+/* ============ LOG STRIP (signature element) ============ */
+#logstrip{
+  position:fixed;top:0;left:0;right:0;height:3px;z-index:200;
+  background:var(--line);
+}
+#logstrip>div{height:100%;width:0%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));transition:width .15s linear;}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky;top:3px;z-index:100;
+  display:flex;align-items:center;gap:16px;
+  background:rgba(11,13,15,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+  padding:10px 20px;
+}
+body.light header{background:rgba(246,245,241,.92);}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:15px;white-space:nowrap;}
+.brand .mark{width:10px;height:10px;background:var(--amber);display:inline-block;transform:rotate(45deg);}
+.brand small{color:var(--muted);font-weight:400;font-size:11px;display:block;letter-spacing:.08em;}
+#search{
+  flex:1;max-width:420px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:13px;
+}
+#search:focus{outline:1px solid var(--amber);}
+.hbtn{
+  background:transparent;border:1px solid var(--line);color:var(--text);
+  padding:8px 12px;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:12px;
+}
+.hbtn:hover{border-color:var(--amber);color:var(--amber);}
+#offsetIndicator{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+#offsetIndicator b{color:var(--amber);}
+
+/* ============ LAYOUT ============ */
+#shell{display:flex;max-width:1440px;margin:0 auto;}
+nav#sidebar{
+  width:270px;flex-shrink:0;
+  border-right:1px solid var(--line);
+  height:calc(100vh - 51px);position:sticky;top:54px;overflow-y:auto;
+  padding:14px 0 60px;
+}
+nav#sidebar::-webkit-scrollbar{width:6px;}
+nav#sidebar::-webkit-scrollbar-thumb{background:var(--line);}
+.navgroup-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);
+  padding:14px 18px 6px;text-transform:uppercase;
+}
+.navitem{
+  display:flex;gap:10px;align-items:baseline;
+  padding:7px 18px;font-size:13px;color:var(--muted);cursor:pointer;
+  border-left:2px solid transparent;
+}
+.navitem:hover{color:var(--text);background:var(--panel-2);}
+.navitem.active{color:var(--amber);border-left-color:var(--amber);background:var(--panel-2);}
+.navitem .off{font-family:var(--mono);font-size:10px;color:var(--amber-dim);min-width:34px;}
+.navitem.active .off{color:var(--amber);}
+
+main{flex:1;min-width:0;padding:0 40px 100px;}
+.section{padding-top:70px;margin-top:-40px;}
+.section-head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:24px;
+}
+.section-head h2{font-size:26px;margin:0;}
+.badge{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:3px;font-weight:600;
+}
+.badge.beg{background:#1f3a24;color:#7fd996;}
+.badge.int{background:#1a2f42;color:#6fb7e8;}
+.badge.adv{background:#402a12;color:#e8a33d;}
+.badge.exp{background:#3a1616;color:#e0665a;}
+.badge.arc{background:#2c1a3a;color:#c69bef;}
+.lead{color:var(--muted);font-size:15px;max-width:800px;}
+
+.callout{
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);
+  padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:14px;
+}
+.callout.teal{border-left-color:var(--teal);}
+.callout.red{border-left-color:var(--red);}
+.callout.purple{border-left-color:var(--purple);}
+.callout b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:6px;}
+.callout.teal b{color:var(--teal);}
+.callout.red b{color:var(--red);}
+.callout.purple b{color:var(--purple);}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+tr:hover td{background:var(--panel);}
+
+pre{
+  background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  padding:16px 18px;overflow-x:auto;font-size:12.8px;position:relative;margin:14px 0;
+}
+.codewrap{position:relative;}
+.copybtn{
+  position:absolute;top:8px;right:8px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+  font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;
+}
+.copybtn:hover{color:var(--amber);border-color:var(--amber);}
+.tok-kw{color:#c586c0;} .tok-str{color:#ce9178;} .tok-com{color:#6a9955;} .tok-typ{color:#4ec9b0;} .tok-ann{color:#dcdcaa;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;}
+.card h4{margin:0 0 8px;font-size:14px;color:var(--amber);}
+
+/* accordion */
+.acc{border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-h{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13.5px;font-weight:600;}
+.acc-h:hover{color:var(--amber);}
+.acc-h::after{content:'+';color:var(--amber);font-size:16px;}
+.acc.open .acc-h::after{content:'–';}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .25s ease;padding:0 16px;}
+.acc.open .acc-b{max-height:2400px;padding:0 16px 16px;}
+.acc-b p:first-child{margin-top:0;}
+
+/* diagrams */
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px;margin:16px 0;overflow-x:auto;}
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;font-family:var(--mono);font-size:12px;}
+.node{background:var(--panel-2);border:1px solid var(--line);padding:8px 12px;border-radius:6px;white-space:nowrap;}
+.node.hi{border-color:var(--amber);color:var(--amber);}
+.node.t{border-color:var(--teal);color:var(--teal);}
+.arrow{padding:0 8px;color:var(--muted);}
+.vflow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+.vflow .arrow{padding:2px 0 2px 20px;}
+
+/* toggle tabs (easy / deep / production) */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 0;}
+.tab{padding:8px 14px;font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;}
+.tab.active{color:var(--amber);border-color:var(--amber);}
+.tabpanel{display:none;padding:14px 0;}
+.tabpanel.active{display:block;}
+
+/* interview qa */
+.qa{border:1px solid var(--line);border-radius:8px;margin:10px 0;background:var(--panel);}
+.qa-q{padding:13px 16px;cursor:pointer;font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:10px;}
+.qa-q .qn{color:var(--muted);font-family:var(--mono);font-size:11px;}
+.qa-a{display:none;padding:0 16px 16px;font-size:13.5px;color:var(--muted);}
+.qa.open .qa-a{display:block;}
+.qa.open .qa-q{color:var(--amber);}
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.filterbtn{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:20px;font-family:var(--mono);font-size:11px;cursor:pointer;}
+.filterbtn.active{border-color:var(--amber);color:var(--amber);}
+
+/* quiz */
+#quizbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;}
+.quiz-opt{display:block;width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  padding:10px 14px;border-radius:6px;margin:6px 0;cursor:pointer;font-size:13.5px;}
+.quiz-opt:hover{border-color:var(--amber);}
+.quiz-opt.correct{border-color:var(--teal);background:#0f2a26;color:#7fe0d4;}
+.quiz-opt.wrong{border-color:var(--red);background:#2a1414;color:#f2a89e;}
+#quizmeta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px;}
+
+/* flashcards */
+#flashwrap{max-width:520px;margin:16px auto;}
+.flashcard{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;height:220px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;
+  font-size:16px;position:relative;
+}
+.flashcard .face-b{display:none;color:var(--amber);font-size:14px;}
+.flashcard.flip .face-a{display:none;}
+.flashcard.flip .face-b{display:block;}
+.flashctrl{display:flex;justify-content:center;gap:10px;margin-top:12px;}
+
+footer{border-top:1px solid var(--line);padding:40px 20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;}
+
+#toTop{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--line);color:var(--muted);
+  width:38px;height:38px;border-radius:50%;cursor:pointer;display:none;font-family:var(--mono);z-index:150;}
+#toTop:hover{border-color:var(--amber);color:var(--amber);}
+
+.hidden-by-search{display:none !important;}
+mark{background:var(--amber-dim);color:#fff;padding:0 2px;border-radius:2px;}
+
+@media(max-width:1000px){
+  nav#sidebar{display:none;}
+  main{padding:0 18px 100px;}
+}
+</style>
+</head>
+<body>
+
+<div id="logstrip"><div id="logfill"></div></div>
+
+<header>
+  <div class="brand"><span class="mark"></span><div>KAFKA MASTERCLASS<small>fundamentals → architect · offset 0 → EOF</small></div></div>
+  <input id="search" placeholder="Search topics, terms, commands…" />
+  <span id="offsetIndicator">offset <b id="offsetNow">0000</b> / <span id="offsetMax">0035</span></span>
+  <button class="hbtn" id="themeBtn">☾ theme</button>
+</header>
+
+<div id="shell">
+<nav id="sidebar"></nav>
+<main id="main">
+
+<!-- ================= 1. FUNDAMENTALS ================= -->
+<section class="section" id="fundamentals">
+  <div class="section-head"><h2>01 · Kafka Fundamentals</h2><span class="badge beg">beginner</span></div>
+  <p class="lead">Every concept in this course is taught through one running system: the <b>E-Commerce Order Processing Platform</b> — Order, Payment, Inventory, Shipping and Notification services, backed by Oracle and wired together with Kafka. Keep that picture in mind; it doesn't change for the rest of the course.</p>
+
+  <h3>Why Kafka exists</h3>
+  <p>Once you pass roughly five microservices calling each other synchronously, you hit the same three walls every time: a slow downstream service (Inventory) drags down an unrelated caller (Order), a crashed service loses in-flight work, and every new consumer of an event (Analytics, Fraud, Audit) means another point-to-point integration. Kafka replaces the mesh of direct calls with one durable, ordered, replayable log that any number of services can read independently, at their own pace, without the producer knowing or caring who's listening.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>Kafka vs REST</h4>REST is synchronous and point-to-point — the caller blocks and couples its uptime to the callee's. Kafka is asynchronous and decoupled — the producer commits a fact ("OrderCreated") to a durable log and moves on; consumers read it whenever they're ready. Use REST for request/response where you need an answer now; use Kafka for facts that other parts of the system need to react to, possibly hours or days later.</div>
+    <div class="card"><h4>Kafka vs RabbitMQ / ActiveMQ</h4>Traditional brokers <i>delete</i> a message once it's consumed — the queue is a mailbox. Kafka <i>retains</i> the message on disk for a configured retention window regardless of consumption, so ten consumer groups can each read the same event independently, and new consumers can replay history. RabbitMQ is better at complex per-message routing and priority queues; Kafka is better at high-throughput, replayable event streams.</div>
+    <div class="card"><h4>Kafka vs database polling</h4>Polling ("SELECT * FROM orders WHERE processed = 0") wastes cycles when idle, causes lock contention under load, and doesn't scale past one or two consumers. Kafka pushes work via a pull-based long-poll that scales horizontally with consumer groups and adds zero load to Oracle.</div>
+    <div class="card"><h4>Kafka vs cloud queues (SQS/PubSub)</h4>Most cloud queues delete-on-ack like traditional brokers and offer weaker ordering guarantees. Kafka's partition-level ordering and log retention make it the default choice when multiple independent teams need to consume the same event stream over time, not just once.</div>
+  </div>
+
+  <h3>The analogy map</h3>
+  <p>These analogies recur through the whole course — memorize the mapping once:</p>
+  <table>
+    <tr><th>Kafka term</th><th>Analogy</th><th>What it really is</th></tr>
+    <tr><td>Producer</td><td>Person shipping a parcel</td><td>A client application publishing events</td></tr>
+    <tr><td>Topic</td><td>A highway</td><td>A named, categorized stream of events</td></tr>
+    <tr><td>Partition</td><td>A lane on the highway</td><td>An ordered, append-only shard of the topic</td></tr>
+    <tr><td>Broker</td><td>A warehouse</td><td>A Kafka server storing partitions</td></tr>
+    <tr><td>Consumer</td><td>Person receiving parcels</td><td>A client application reading events</td></tr>
+    <tr><td>Consumer Group</td><td>A team of warehouse workers sharing the lanes</td><td>A set of consumers that split partitions between them</td></tr>
+    <tr><td>Offset</td><td>Parcel's position number on the lane</td><td>A sequential ID of a record within a partition</td></tr>
+    <tr><td>Replication</td><td>Backup copies of the warehouse's inventory</td><td>Copies of a partition kept on other brokers</td></tr>
+  </table>
+
+  <div class="callout"><b>Memory shortcut</b>Kafka reliability = <b>A-R-O</b>: <b>A</b>cks, <b>R</b>eplication, <b>O</b>ffset. If you can explain how these three interact, you can explain Kafka's entire durability story.</div>
+</section>
+
+<!-- ================= 2. ARCHITECTURE ================= -->
+<section class="section" id="architecture">
+  <div class="section-head"><h2>02 · Kafka Architecture</h2><span class="badge beg">beginner</span></div>
+  <p class="lead">A Kafka cluster is a set of brokers. A topic is split into partitions, and each partition is spread and replicated across brokers. Consumer groups divide those partitions among themselves.</p>
+
+  <div class="diagram">
+    <div class="vflow">
+      <div class="node hi">Producer (Order Service)</div>
+      <div class="arrow">↓ writes to</div>
+      <div class="node">Kafka Cluster</div>
+      <div class="arrow">↓ made of</div>
+      <div class="node">Broker 1</div><div class="node">Broker 2</div><div class="node">Broker 3</div>
+      <div class="arrow">↓ each hosts partitions of</div>
+      <div class="node hi">Topic: order-events</div>
+      <div class="arrow">↓ split into</div>
+      <div class="node t">Partition 0</div><div class="node t">Partition 1</div><div class="node t">Partition 2</div>
+      <div class="arrow">↓ read by</div>
+      <div class="node">Consumer Group: payment-service</div>
+      <div class="arrow">↓ split across</div>
+      <div class="node t">Consumer 1</div><div class="node t">Consumer 2</div><div class="node t">Consumer 3</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h4>Why partitions exist</h4>A single partition is a strictly ordered, single-writer-per-broker log — that ordering guarantee is exactly what prevents unlimited parallelism. Splitting a topic into N partitions lets N consumers in a group read in parallel, and lets the cluster spread write/read load across brokers. More partitions = more parallelism, at the cost of per-partition ordering only (never global topic ordering).</div>
+    <div class="card"><h4>Why brokers exist</h4>A broker is the unit of storage, network, and failure. Spreading partitions and their replicas across brokers means the loss of one broker doesn't lose data (replicas elsewhere) or availability (another replica becomes leader).</div>
+    <div class="card"><h4>Partition assignment & leader election</h4>For each partition, one replica is elected <b>leader</b> — all reads and writes for that partition go through it. The others are <b>followers</b> that replicate the leader's log. If the leader's broker dies, the controller promotes an in-sync follower to leader.</div>
+    <div class="card"><h4>Consumer partition assignment</h4>Within a consumer group, the group coordinator assigns each partition to exactly one consumer. If consumers &gt; partitions, the excess consumers sit idle. This is why partition count is a hard ceiling on consumer parallelism.</div>
+  </div>
+
+  <h3>ZooKeeper vs KRaft</h3>
+  <table>
+    <tr><th></th><th>ZooKeeper mode (legacy)</th><th>KRaft mode (modern, default since Kafka 3.5+)</th></tr>
+    <tr><td>Metadata storage</td><td>External ZooKeeper ensemble</td><td>Internal Raft-based metadata quorum of controller nodes</td></tr>
+    <tr><td>Operational footprint</td><td>Two systems to run, patch, secure</td><td>One system — brokers can also serve as controllers</td></tr>
+    <tr><td>Controller failover</td><td>ZK-mediated, slower at scale</td><td>Raft leader election, faster and more scalable</td></tr>
+    <tr><td>Max partitions</td><td>Practically limited (tens of thousands)</td><td>Designed for millions of partitions</td></tr>
+  </table>
+  <div class="callout purple"><b>Architecture decision</b>New clusters should default to KRaft. ZooKeeper mode is on a deprecation path; only expect it in legacy or brownfield clusters you're migrating away from.</div>
+</section>
+
+<!-- ================= 3. INTERNALS ================= -->
+<section class="section" id="internals">
+  <div class="section-head"><h2>03 · What Really Happens When a Message Is Sent</h2><span class="badge int">intermediate</span></div>
+
+  <h3>Producer side</h3>
+  <div class="diagram"><div class="vflow">
+    <div class="node hi">Java app calls producer.send(record)</div>
+    <div class="arrow">↓</div><div class="node">Serializer turns key/value into bytes</div>
+    <div class="arrow">↓</div><div class="node">Partitioner decides target partition (key hash, or sticky/round-robin)</div>
+    <div class="arrow">↓</div><div class="node">Record appended to an in-memory RecordAccumulator batch for that partition</div>
+    <div class="arrow">↓ once linger.ms elapses or batch.size fills</div><div class="node">Sender thread ships the batch over the network</div>
+    <div class="arrow">↓</div><div class="node t">Broker's partition leader appends it to its log</div>
+    <div class="arrow">↓</div><div class="node t">Followers fetch and replicate the new entry</div>
+    <div class="arrow">↓ once acks condition satisfied</div><div class="node hi">Acknowledgement returns to the producer</div>
+  </div></div>
+  <p>Note the two levels of batching hidden in that diagram: the <code>RecordAccumulator</code> batches records <i>per partition</i> in memory before a network call is even made, and <code>linger.ms</code> intentionally introduces a small delay so more records can join the batch — trading a few milliseconds of latency for dramatically higher throughput per network round-trip.</p>
+
+  <h3>Consumer side</h3>
+  <div class="diagram"><div class="vflow">
+    <div class="node t">Broker holds the partition log</div>
+    <div class="arrow">↓</div><div class="node">Consumer issues a Fetch request from its current offset</div>
+    <div class="arrow">↓</div><div class="node">Broker returns records from that offset onward</div>
+    <div class="arrow">↓</div><div class="node">Deserializer turns bytes back into objects</div>
+    <div class="arrow">↓</div><div class="node hi">Business logic runs (e.g. reserve inventory)</div>
+    <div class="arrow">↓</div><div class="node hi">Offset is committed (auto or manual)</div>
+  </div></div>
+  <div class="callout"><b>Memory shortcut</b>Producer flow = <b>S-B-S-N-A</b>: Serialize → Batch → Select partition → Network → Acknowledge.<br>Consumer loop = <b>P-P-C</b>: Poll → Process → Commit.</div>
+</section>
+
+<!-- ================= 4. PRODUCER DEEP DIVE ================= -->
+<section class="section" id="producer">
+  <div class="section-head"><h2>04 · Producer Deep Dive</h2><span class="badge int">intermediate</span></div>
+
+  <h3>Key configuration knobs</h3>
+  <table>
+    <tr><th>Config</th><th>What it controls</th><th>Production guidance</th></tr>
+    <tr><td><code>acks</code></td><td>How many replicas must confirm before the write is "done"</td><td><code>all</code> for anything financial; <code>1</code> for high-volume telemetry where an occasional loss is acceptable</td></tr>
+    <tr><td><code>retries</code> / <code>delivery.timeout.ms</code></td><td>How long/how hard the client retries a failed send before giving up</td><td>Leave retries high, bound total time with <code>delivery.timeout.ms</code></td></tr>
+    <tr><td><code>linger.ms</code></td><td>How long to wait for more records before sending a batch</td><td>5–20ms for throughput-sensitive pipelines; 0 for latency-sensitive ones</td></tr>
+    <tr><td><code>batch.size</code></td><td>Max bytes per batch per partition</td><td>Increase for high-throughput topics with large payloads</td></tr>
+    <tr><td><code>buffer.memory</code></td><td>Total client-side memory for unsent batches</td><td>Raise if you see <code>BufferExhaustedException</code> under burst load</td></tr>
+    <tr><td><code>compression.type</code></td><td>Batch compression algorithm</td><td><code>lz4</code> or <code>zstd</code> — cheap CPU trade for large network/disk savings</td></tr>
+    <tr><td><code>enable.idempotence</code></td><td>Prevents duplicate writes caused by producer retries</td><td>Always <code>true</code> in modern Kafka; required for transactions</td></tr>
+    <tr><td><code>max.in.flight.requests.per.connection</code></td><td>Unacked requests allowed in parallel</td><td>≤5 keeps ordering guaranteed even with idempotence enabled</td></tr>
+  </table>
+
+  <h3>acks=0 vs acks=1 vs acks=all</h3>
+  <div class="grid3">
+    <div class="card"><h4>acks=0</h4>Fire-and-forget. Producer doesn't wait for any broker confirmation. Fastest, but a broker restart can silently lose the record. Fine for metrics you can afford to lose, never for payments.</div>
+    <div class="card"><h4>acks=1</h4>Waits for the partition leader to write to its own log, not for followers. Fast, but if the leader dies before followers replicate, the record is lost even though the producer thought it succeeded.</div>
+    <div class="card"><h4>acks=all (-1)</h4>Waits for all in-sync replicas (bounded by <code>min.insync.replicas</code>) to acknowledge. Strongest durability, highest latency. This is the only safe setting for order and payment events.</div>
+  </div>
+
+  <div class="codewrap"><pre><code><span class="tok-com">// Spring Boot: producer config for the Payment Service — durability over raw speed</span>
+<span class="tok-ann">@Bean</span>
+<span class="tok-kw">public</span> <span class="tok-typ">ProducerFactory</span>&lt;String, PaymentEvent&gt; paymentProducerFactory() {
+    <span class="tok-typ">Map</span>&lt;String, Object&gt; props = <span class="tok-kw">new</span> <span class="tok-typ">HashMap</span>&lt;&gt;();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    props.put(ProducerConfig.ACKS_CONFIG, <span class="tok-str">"all"</span>);
+    props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, <span class="tok-kw">true</span>);
+    props.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
+    props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, <span class="tok-str">"lz4"</span>);
+    props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.<span class="tok-kw">class</span>);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.<span class="tok-kw">class</span>);
+    <span class="tok-kw">return new</span> <span class="tok-typ">DefaultKafkaProducerFactory</span>&lt;&gt;(props);
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- ================= 5. PARTITIONING ================= -->
+<section class="section" id="partitioning">
+  <div class="section-head"><h2>05 · Partitioning Strategy</h2><span class="badge int">intermediate</span></div>
+  <p>The partitioner decides which lane a record travels down. Kafka guarantees order <i>only within a partition</i> — this single fact drives most partition-key decisions you'll ever make.</p>
+  <div class="grid2">
+    <div class="card"><h4>Key-based (default when a key is present)</h4><code>hash(key) % numPartitions</code>. Every record with the same key always lands on the same partition, so all events for one entity stay in arrival order relative to each other.</div>
+    <div class="card"><h4>Round robin / sticky (no key)</h4>Spreads records evenly across partitions to balance load, but gives up any ordering guarantee between records.</div>
+  </div>
+  <div class="callout teal"><b>Applied to the order platform</b>Every <code>OrderCreated</code>, <code>PaymentCompleted</code>, and <code>OrderShipped</code> event is keyed by <code>customerId</code> (or <code>orderId</code>, depending on the aggregate). Customer 1001's events all route to the same partition, so a consumer reading that partition sees them in the order they happened — but two different customers' events can legitimately interleave or even appear "out of order" relative to each other, and that's fine because nothing depends on cross-customer ordering.</div>
+  <p><b>Custom partitioner</b> — used when the default key hash doesn't match a business rule, e.g. routing VIP customers to a dedicated set of partitions for isolation:</p>
+  <div class="codewrap"><pre><code><span class="tok-kw">public class</span> <span class="tok-typ">VipAwarePartitioner</span> <span class="tok-kw">implements</span> Partitioner {
+    <span class="tok-ann">@Override</span>
+    <span class="tok-kw">public int</span> partition(String topic, Object key, <span class="tok-kw">byte</span>[] keyBytes,
+                        Object value, <span class="tok-kw">byte</span>[] valueBytes, Cluster cluster) {
+        <span class="tok-kw">int</span> numPartitions = cluster.partitionCountForTopic(topic);
+        <span class="tok-kw">if</span> (isVipCustomer((String) key)) {
+            <span class="tok-kw">return</span> Math.abs(key.hashCode()) % VIP_PARTITION_COUNT; <span class="tok-com">// reserved lanes</span>
+        }
+        <span class="tok-kw">return</span> VIP_PARTITION_COUNT + (Math.abs(key.hashCode()) % (numPartitions - VIP_PARTITION_COUNT));
+    }
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- ================= 6. CONSUMER DEEP DIVE ================= -->
+<section class="section" id="consumer">
+  <div class="section-head"><h2>06 · Consumer Deep Dive</h2><span class="badge int">intermediate</span></div>
+  <table>
+    <tr><th>Config</th><th>Meaning</th><th>Guidance</th></tr>
+    <tr><td><code>max.poll.records</code></td><td>Max records returned per poll() call</td><td>Lower it if each record does heavy work (e.g. an Oracle write) to avoid hitting the poll interval timeout</td></tr>
+    <tr><td><code>max.poll.interval.ms</code></td><td>Max time allowed between polls before the consumer is considered dead and the group rebalances</td><td>Raise for slow batch processing; don't just raise blindly — first check if processing itself needs optimizing</td></tr>
+    <tr><td><code>session.timeout.ms</code> / heartbeat</td><td>Detects a crashed consumer via missed heartbeats on a background thread</td><td>Keep well below <code>max.poll.interval.ms</code>; they answer different questions ("is the process alive" vs "is polling keeping up")</td></tr>
+    <tr><td><code>enable.auto.commit</code></td><td>Whether offsets commit automatically on a timer</td><td>Disable for anything where you must guarantee processing happened before the offset moves — see Offset Management</td></tr>
+  </table>
+  <h3>Manual commit: sync vs async</h3>
+  <div class="grid2">
+    <div class="card"><h4>commitSync()</h4>Blocks until the broker confirms the commit. Safer — you know the offset moved — but adds latency per batch.</div>
+    <div class="card"><h4>commitAsync()</h4>Fire-and-forget with a callback for errors. Higher throughput, but a failed async commit is easy to silently miss; always pair with a final <code>commitSync()</code> on shutdown.</div>
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-com">// Manual-ack Spring Kafka listener — commit only after inventory is actually reserved</span>
+<span class="tok-ann">@KafkaListener</span>(topics = <span class="tok-str">"order-events"</span>, groupId = <span class="tok-str">"inventory-service"</span>,
+               containerFactory = <span class="tok-str">"manualAckFactory"</span>)
+<span class="tok-kw">public void</span> onOrderCreated(ConsumerRecord&lt;String, OrderCreatedEvent&gt; record, Acknowledgment ack) {
+    inventoryService.reserve(record.value());
+    ack.acknowledge(); <span class="tok-com">// offset commits only after successful processing</span>
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- ================= 7. CONSUMER GROUPS & REBALANCING ================= -->
+<section class="section" id="consumer-groups">
+  <div class="section-head"><h2>07 · Consumer Groups &amp; Rebalancing</h2><span class="badge int">intermediate</span></div>
+  <div class="diagram"><div class="flow" style="flex-direction:column;gap:8px;">
+    <div>Topic <code>order-events</code>: <span class="node t">P0</span> <span class="node t">P1</span> <span class="node t">P2</span> <span class="node t">P3</span></div>
+    <div class="arrow" style="padding-left:0;">↓ assigned across group <code>inventory-service</code></div>
+    <div><span class="node">C1 → P0</span> <span class="node">C2 → P1</span> <span class="node">C3 → P2</span> <span class="node">C4 → P3</span></div>
+  </div></div>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">A 5th consumer (C5) joins the group</div><div class="acc-b"><p>Group coordinator triggers a rebalance. With only 4 partitions, C5 gets none and sits idle until another consumer leaves or partitions increase. <b>Consumer count can never exceed partition count</b> for useful parallelism.</p></div></div>
+    <div class="acc"><div class="acc-h">A consumer leaves cleanly</div><div class="acc-b"><p>It sends a <code>LeaveGroup</code> request; the coordinator immediately reassigns its partitions to remaining members.</p></div></div>
+    <div class="acc"><div class="acc-h">A consumer crashes</div><div class="acc-b"><p>No clean leave — the group only notices after missed heartbeats exceed <code>session.timeout.ms</code>. Its partitions are unread until that timeout fires, meaning a real (if short) processing gap.</p></div></div>
+    <div class="acc"><div class="acc-h">A consumer is just slow (not crashed)</div><div class="acc-b"><p>If it can't call <code>poll()</code> again within <code>max.poll.interval.ms</code>, the coordinator treats it as dead and rebalances even though the process is alive — a classic cause of "phantom" rebalance loops when processing time is unpredictable.</p></div></div>
+    <div class="acc"><div class="acc-h">A new partition is added to the topic</div><div class="acc-b"><p>Existing keys don't automatically move — only new records hashing to the new partition land there. This can quietly break "same key always same partition" assumptions if you repartition a live topic; plan partition count up front where ordering matters.</p></div></div>
+  </div>
+  <h3>Eager vs cooperative rebalancing, and static membership</h3>
+  <div class="grid3">
+    <div class="card"><h4>Eager rebalance</h4>Every consumer gives up <i>all</i> its partitions and the group reassigns from scratch — simple but causes a full stop-the-world pause across the group.</div>
+    <div class="card"><h4>Cooperative (incremental) rebalance</h4>Only the specific partitions that need to move are revoked; everyone else keeps processing uninterrupted. This is the default strategy in modern clients and should be preferred.</div>
+    <div class="card"><h4>Static membership</h4>Setting <code>group.instance.id</code> lets a consumer rejoin after a brief restart (deploy, pod reschedule) without triggering a rebalance at all, as long as it returns inside <code>session.timeout.ms</code>.</div>
+  </div>
+</section>
+
+<!-- ================= 8. OFFSET MANAGEMENT ================= -->
+<section class="section" id="offsets">
+  <div class="section-head"><h2>08 · Offset Management</h2><span class="badge int">intermediate</span></div>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>Log end offset</td><td>The offset of the next record the broker will write — the "high water mark"</td></tr>
+    <tr><td>Current offset</td><td>The next record the consumer will fetch</td></tr>
+    <tr><td>Committed offset</td><td>The last offset the consumer has told Kafka it's "done with"</td></tr>
+    <tr><td><code>auto.offset.reset=earliest</code></td><td>New/unknown consumer group starts from the very beginning of the retained log</td></tr>
+    <tr><td><code>auto.offset.reset=latest</code></td><td>New consumer group starts only from new records going forward</td></tr>
+    <tr><td><code>auto.offset.reset=none</code></td><td>Throw an exception instead of guessing — forces an explicit operational decision</td></tr>
+  </table>
+  <div class="callout red"><b>Scenario: commit before vs after processing</b>
+  <p><b>Commit before processing, then crash</b> → offset already moved, but the work never happened → the message is silently skipped (message loss from the application's point of view).</p>
+  <p><b>Commit after processing, then crash before the commit lands</b> → on restart the consumer re-reads the same record and reprocesses it (duplicate processing). This is why "at-least-once" is the natural default — you must design consumers to be idempotent rather than trying to engineer offset commits into never producing a duplicate.</p></div>
+</section>
+
+<!-- ================= 9. DELIVERY SEMANTICS & IDEMPOTENCY ================= -->
+<section class="section" id="delivery">
+  <div class="section-head"><h2>09 · Delivery Semantics &amp; Idempotency</h2><span class="badge int">intermediate</span></div>
+  <div class="grid3">
+    <div class="card"><h4>At most once</h4>Commit offset before processing. Payment example: a crash after commit but before charging the card means the payment is simply <b>never made</b>. Cheap, but unacceptable for money.</div>
+    <div class="card"><h4>At least once</h4>Commit offset after processing. A crash between processing and commit means the payment can be <b>charged twice</b> on redelivery. This is Kafka's practical default — solved with idempotent consumers, not avoided.</div>
+    <div class="card"><h4>Exactly once</h4>Requires an idempotent producer + transactions + idempotent (or transactional) consumers working together end-to-end. Achievable Kafka-to-Kafka; genuinely hard — not free — when a non-Kafka system like Oracle is in the loop.</div>
+  </div>
+  <h3>Implementing idempotency in the Payment Service</h3>
+  <p>Given a Kafka redelivery of <code>PAY-10001</code>, the application — not Kafka — must guarantee it's charged once:</p>
+  <div class="grid2">
+    <div class="card"><h4>Database unique constraint</h4>A unique index on <code>payment_id</code> in Oracle. The second insert attempt throws a constraint violation, which the consumer catches and treats as "already handled" — the strongest guarantee when a DB write is already happening anyway.</div>
+    <div class="card"><h4>Idempotency / dedup table</h4>A dedicated table of processed message IDs checked before doing the real work — useful when the main write isn't naturally unique-constrained (e.g. calling an external payment gateway).</div>
+    <div class="card"><h4>Redis (SETNX with TTL)</h4>Fast, in-memory dedup check for high-throughput paths where a DB round-trip per check is too slow. Trade-off: Redis eviction/TTL means the dedup window isn't infinite.</div>
+    <div class="card"><h4>Kafka's idempotent producer</h4>Prevents duplicates <i>caused by the producer retrying a send</i> (e.g. a network blip after the broker actually wrote the record). It does <b>not</b> protect against the application publishing the same business event twice — that's still your job.</div>
+  </div>
+</section>
+
+<!-- ================= 10. REAL WORLD PROJECT ================= -->
+<section class="section" id="project">
+  <div class="section-head"><h2>10 · The Running Example — Order Processing Platform</h2><span class="badge int">intermediate</span></div>
+  <div class="diagram"><div class="vflow">
+    <div class="node hi">Customer</div><div class="arrow">↓</div>
+    <div class="node">Order Service</div><div class="arrow">↓ writes</div>
+    <div class="node">Oracle: ORDERS table</div><div class="arrow">↓ publishes</div>
+    <div class="node t">Kafka: OrderCreated</div><div class="arrow">↓</div>
+    <div class="node">Payment Service</div><div class="arrow">↓ publishes</div>
+    <div class="node t">Kafka: PaymentCompleted</div><div class="arrow">↓</div>
+    <div class="node">Inventory Service</div><div class="arrow">↓ publishes</div>
+    <div class="node t">Kafka: InventoryReserved</div><div class="arrow">↓</div>
+    <div class="node">Shipping Service</div><div class="arrow">↓ publishes</div>
+    <div class="node t">Kafka: ShipmentCreated</div><div class="arrow">↓</div>
+    <div class="node hi">Notification Service → Email / SMS</div>
+  </div></div>
+  <p>Every downstream service (Audit, Analytics) subscribes to the same topics independently — none of them require Order Service to know they exist. That decoupling is the entire point of the architecture, and it's what you should lead with when asked "why event-driven?" in an interview.</p>
+</section>
+
+<!-- ================= 11. OUTBOX & CDC ================= -->
+<section class="section" id="outbox">
+  <div class="section-head"><h2>11 · The Database + Kafka Problem, Outbox, and CDC</h2><span class="badge adv">advanced</span></div>
+  <div class="callout red"><b>The dual-write problem</b>Order Service does two independent things: commit a row to Oracle, then publish to Kafka. There is no distributed transaction spanning both by default. If Oracle commits but the Kafka publish fails (network blip, broker down), the order exists but no downstream service ever hears about it. If you reverse the order and publish first, you can end up with an event for an order that never actually committed. Distributed transactions across heterogeneous systems (XA/2PC) are technically possible but operationally painful and rarely used in modern architectures — hence outbox and CDC.</div>
+
+  <h3>Outbox Pattern</h3>
+  <div class="diagram"><div class="vflow">
+    <div class="node hi">Spring Boot service, single Oracle transaction</div>
+    <div class="arrow">↓ writes both rows atomically</div>
+    <div class="node">ORDERS</div><div class="node">OUTBOX_EVENTS</div>
+    <div class="arrow">↓ polled by</div>
+    <div class="node">Outbox Publisher</div>
+    <div class="arrow">↓</div>
+    <div class="node t">Kafka</div>
+  </div></div>
+  <p>Because the order row and the outbox row are written in the <i>same local Oracle transaction</i>, they either both commit or both roll back — no distributed transaction needed. A separate publisher (polling the table, or backed by CDC) then reliably ships outbox rows to Kafka and marks them sent.</p>
+  <div class="codewrap"><pre><code><span class="tok-ann">@Entity</span>
+<span class="tok-kw">class</span> <span class="tok-typ">OutboxEvent</span> {
+    <span class="tok-ann">@Id</span> <span class="tok-ann">@GeneratedValue</span> <span class="tok-typ">UUID</span> id;
+    <span class="tok-typ">String</span> aggregateType;   <span class="tok-com">// "Order"</span>
+    <span class="tok-typ">String</span> aggregateId;     <span class="tok-com">// orderId</span>
+    <span class="tok-typ">String</span> eventType;       <span class="tok-com">// "OrderCreated"</span>
+    <span class="tok-ann">@Lob</span> <span class="tok-typ">String</span> payload;      <span class="tok-com">// JSON</span>
+    <span class="tok-typ">Instant</span> createdAt;
+    <span class="tok-kw">boolean</span> published = <span class="tok-kw">false</span>;
+}
+
+<span class="tok-ann">@Service</span>
+<span class="tok-kw">class</span> <span class="tok-typ">OrderService</span> {
+    <span class="tok-ann">@Transactional</span> <span class="tok-com">// one local Oracle transaction — atomic by construction</span>
+    <span class="tok-kw">public void</span> createOrder(OrderRequest req) {
+        <span class="tok-typ">Order</span> order = orderRepository.save(<span class="tok-kw">new</span> Order(req));
+        outboxRepository.save(<span class="tok-kw">new</span> OutboxEvent(
+            <span class="tok-str">"Order"</span>, order.getId(), <span class="tok-str">"OrderCreated"</span>, toJson(order)));
+        <span class="tok-com">// no Kafka call here — the publisher handles that out-of-band</span>
+    }
+}
+
+<span class="tok-ann">@Scheduled</span>(fixedDelay = 500)
+<span class="tok-kw">void</span> publishPendingOutboxEvents() {
+    <span class="tok-kw">for</span> (OutboxEvent e : outboxRepository.findByPublishedFalse()) {
+        kafkaTemplate.send(<span class="tok-str">"order-events"</span>, e.getAggregateId(), e.getPayload())
+            .whenComplete((r, ex) -&gt; { <span class="tok-kw">if</span> (ex == <span class="tok-kw">null</span>) markPublished(e); });
+    }
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+
+  <h3>Change Data Capture (Debezium)</h3>
+  <div class="diagram"><div class="flow"><div class="node">Oracle redo log</div><span class="arrow">→</span><div class="node">Debezium (Kafka Connect source)</div><span class="arrow">→</span><div class="node t">Kafka</div></div></div>
+  <p>CDC tails the database's own transaction log (no polling, near-real-time) and turns every row change into an event automatically — including changes made outside your service, like a DBA hotfix. It removes the need to hand-write outbox-publishing code, at the cost of another moving piece (Debezium/Kafka Connect) to operate and a schema that's now coupled to your table structure unless you carefully shape the CDC event.</p>
+  <table>
+    <tr><th></th><th>Outbox Pattern</th><th>CDC (Debezium)</th><th>Direct publish (no pattern)</th></tr>
+    <tr><td>Atomicity with DB write</td><td>Guaranteed (same local tx)</td><td>Guaranteed (reads committed redo log)</td><td>Not guaranteed — dual write problem</td></tr>
+    <tr><td>Extra infra</td><td>A table + a lightweight poller</td><td>Kafka Connect + Debezium + log-mining privileges</td><td>None</td></tr>
+    <tr><td>Event shape control</td><td>Full control (you write the payload)</td><td>Tied to table structure unless transformed</td><td>Full control</td></tr>
+    <tr><td>Use when</td><td>You want explicit control over the event contract</td><td>You need every change captured with minimal app code, or need to feed legacy tables you can't modify</td><td>You've genuinely accepted at-least-once loss risk (rare)</td></tr>
+  </table>
+</section>
+
+<!-- ================= 12. SPRING KAFKA ================= -->
+<section class="section" id="spring-kafka">
+  <div class="section-head"><h2>12 · Spring Kafka</h2><span class="badge int">intermediate</span></div>
+  <div class="grid2">
+    <div class="card"><h4>KafkaTemplate</h4>Thread-safe wrapper around a <code>KafkaProducer</code> for sending records, returning a <code>CompletableFuture</code> you can chain success/failure handling onto.</div>
+    <div class="card"><h4>@KafkaListener</h4>Declarative consumer binding to a topic + group id; Spring manages the poll loop, threading, and (optionally) manual acknowledgment for you.</div>
+    <div class="card"><h4>ConcurrentKafkaListenerContainerFactory</h4>Configures how many consumer threads back a <code>@KafkaListener</code> — set concurrency ≤ partition count, since extra threads beyond that sit idle.</div>
+    <div class="card"><h4>DefaultErrorHandler + DeadLetterPublishingRecoverer</h4>Declarative retry-then-DLQ: retries a failing record N times with backoff, then republishes it to a <code>&lt;topic&gt;.DLT</code> topic instead of blocking the partition forever.</div>
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-ann">@Bean</span>
+<span class="tok-kw">public</span> <span class="tok-typ">DefaultErrorHandler</span> errorHandler(KafkaTemplate&lt;Object, Object&gt; template) {
+    <span class="tok-kw">var</span> recoverer = <span class="tok-kw">new</span> DeadLetterPublishingRecoverer(template);
+    <span class="tok-kw">var</span> backoff = <span class="tok-kw">new</span> ExponentialBackOff(1000L, 2.0);
+    backoff.setMaxInterval(30000L);
+    <span class="tok-typ">DefaultErrorHandler</span> handler = <span class="tok-kw">new</span> DefaultErrorHandler(recoverer, backoff);
+    handler.addNotRetryableExceptions(IllegalArgumentException.<span class="tok-kw">class</span>); <span class="tok-com">// poison messages go straight to DLQ</span>
+    <span class="tok-kw">return</span> handler;
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- ================= 13. TRANSACTIONS & EXACTLY ONCE ================= -->
+<section class="section" id="transactions">
+  <div class="section-head"><h2>13 · Kafka Transactions &amp; Exactly-Once</h2><span class="badge adv">advanced</span></div>
+  <p>A transactional producer wraps a set of sends (and optionally a consumer offset commit) in an atomic unit via <code>transaction.id</code>, <code>initTransactions()</code>, <code>beginTransaction()</code>, <code>commitTransaction()</code>/<code>abortTransaction()</code>. Consumers reading with <code>isolation.level=read_committed</code> never see records from an aborted transaction.</p>
+  <div class="codewrap"><pre><code>producer.initTransactions();
+<span class="tok-kw">try</span> {
+    producer.beginTransaction();
+    producer.send(<span class="tok-kw">new</span> ProducerRecord&lt;&gt;(<span class="tok-str">"inventory-events"</span>, orderId, reservedEvent));
+    producer.send(<span class="tok-kw">new</span> ProducerRecord&lt;&gt;(<span class="tok-str">"audit-events"</span>, orderId, auditEvent));
+    producer.commitTransaction(); <span class="tok-com">// both records become visible atomically</span>
+} <span class="tok-kw">catch</span> (KafkaException e) {
+    producer.abortTransaction(); <span class="tok-com">// neither record becomes visible</span>
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <div class="callout red"><b>Kafka-to-Kafka exactly-once ≠ Kafka+Oracle exactly-once</b>Kafka transactions give you exactly-once <i>within Kafka</i> — a "consume, transform, produce" pipeline (e.g. Kafka Streams) can commit its output records and its consumer offset atomically. They do <b>not</b> extend to an Oracle write in the same consumer. If a listener writes to Oracle and then Kafka, or vice versa, you're back to the dual-write problem — solved with the Outbox Pattern, not with Kafka transactions. Do not tell an interviewer "Kafka gives exactly-once with the database" without this caveat; it's the single most common architect-level mistake candidates make.</div>
+</section>
+
+<!-- ================= 14. REPLICATION ================= -->
+<section class="section" id="replication">
+  <div class="section-head"><h2>14 · Replication, ISR &amp; Failure</h2><span class="badge int">intermediate</span></div>
+  <div class="diagram"><div class="flow"><div class="node hi">Broker 1 — Leader</div><span class="arrow">⇄ replicates ⇄</span><div class="node t">Broker 2 — Follower</div><span class="arrow">⇄</span><div class="node t">Broker 3 — Follower</div></div></div>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>Replication factor</td><td>How many total copies of a partition exist across brokers (commonly 3 in production)</td></tr>
+    <tr><td>ISR (in-sync replicas)</td><td>The subset of replicas that are fully caught up with the leader right now</td></tr>
+    <tr><td><code>min.insync.replicas</code></td><td>The minimum ISR size required for an <code>acks=all</code> write to succeed — e.g. 2 with RF=3 tolerates one broker down and still writes</td></tr>
+  </table>
+  <div class="callout"><b>Broker failure, step by step</b>Broker 2 (a follower) crashes → it drops out of the ISR → writes continue via the leader as long as remaining ISR ≥ <code>min.insync.replicas</code> → when Broker 2 returns it catches up from where it left off and rejoins the ISR. If instead the <b>leader</b> (Broker 1) crashes, the controller promotes an in-sync follower to leader — this is fast in KRaft mode because there's no separate ZooKeeper round-trip.</div>
+</section>
+
+<!-- ================= 15. FAILURE SCENARIOS ================= -->
+<section class="section" id="failures">
+  <div class="section-head"><h2>15 · "What Happens If…?"</h2><span class="badge adv">advanced</span></div>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">Producer crashes mid-send</div><div class="acc-b"><p>If the batch hadn't been acknowledged yet, on restart the producer resends (idempotent producer prevents a duplicate landing twice for the same producer session). If it crashed <i>after</i> the broker wrote but before the ack reached it, the write already happened — the app just doesn't know that yet, which is a normal at-least-once condition.</p></div></div>
+    <div class="acc"><div class="acc-h">A follower broker crashes</div><div class="acc-b"><p>It drops from the ISR. Writes continue as long as the remaining ISR still meets <code>min.insync.replicas</code>. No consumer-visible impact.</p></div></div>
+    <div class="acc"><div class="acc-h">The leader broker crashes</div><div class="acc-b"><p>Brief unavailability for that partition while the controller elects a new leader from the ISR; in-flight requests to the old leader fail and the client's metadata refresh routes to the new leader.</p></div></div>
+    <div class="acc"><div class="acc-h">Cluster loses one broker vs two brokers (RF=3)</h4></div><div class="acc-b"><p>Losing one broker: fully tolerated with <code>min.insync.replicas=2</code> — no data loss, writes continue. Losing two brokers simultaneously: any partition whose remaining single replica isn't enough to satisfy <code>min.insync.replicas</code> stops accepting <code>acks=all</code> writes — Kafka correctly chooses unavailability over silently under-replicating a "successful" write.</p></div></div>
+    <div class="acc"><div class="acc-h">Oracle is unavailable when a consumer tries to write</div><div class="acc-b"><p>The consumer should not commit the offset — it should let the exception propagate (or explicitly retry) so the same record is redelivered once Oracle recovers, at the cost of at-least-once duplicate risk that idempotent writes must absorb.</p></div></div>
+    <div class="acc"><div class="acc-h">Network partition between producer and cluster</div><div class="acc-b"><p>Sends time out and retry per <code>delivery.timeout.ms</code>; the idempotent producer's sequence numbers prevent a retried batch from being applied twice once connectivity returns.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= 16. RETRY & DLQ ================= -->
+<section class="section" id="retry-dlq">
+  <div class="section-head"><h2>16 · Retry &amp; Dead Letter Topics</h2><span class="badge int">intermediate</span></div>
+  <div class="diagram"><div class="flow"><div class="node">Normal processing</div><span class="arrow">→ fails →</span><div class="node">Retry (backoff)</div><span class="arrow">→ still fails →</span><div class="node">Retry again</div><span class="arrow">→ still fails →</span><div class="node red" style="border-color:var(--red);color:var(--red);">DLQ</div></div></div>
+  <p><b>Poison message</b>: a record that will never succeed no matter how many times it's retried (malformed payload, unrecoverable business rule violation). Retrying it indefinitely blocks the partition behind it from making progress — route it to a DLQ immediately instead of retrying, which is exactly what <code>addNotRetryableExceptions</code> does above. <b>Exponential vs fixed backoff</b>: exponential backoff (as shown in the Spring Kafka example) avoids hammering a struggling downstream dependency; fixed backoff is simpler but can pile on load during an outage.</p>
+</section>
+
+<!-- ================= 17. ORDERING ================= -->
+<section class="section" id="ordering">
+  <div class="section-head"><h2>17 · Ordering Guarantees</h2><span class="badge int">intermediate</span></div>
+  <p>Kafka guarantees order <i>within a partition only</i>. For the order lifecycle — <code>OrderCreated → PaymentStarted → PaymentCompleted → OrderShipped</code> — as long as every event for the same <code>orderId</code> is keyed identically, they land on the same partition in the order they were produced.</p>
+  <div class="callout red"><b>How ordering breaks in practice</b>
+  <ul>
+    <li>Different producers publish related events with <i>different</i> keys (e.g. one service keys by <code>orderId</code>, another by <code>customerId</code>) — they land on different partitions with no relative order guarantee.</li>
+    <li>Retries reorder: if <code>max.in.flight.requests.per.connection &gt; 1</code> without idempotence, a retried batch can land after a later batch that succeeded first.</li>
+    <li>Multiple consumers in a group naturally process different partitions in parallel — if your application logic assumes strict global order across all of a topic's records, parallel consumption breaks that assumption regardless of partition-level guarantees.</li>
+  </ul></div>
+</section>
+
+<!-- ================= 18. SCHEMA REGISTRY & AVRO ================= -->
+<section class="section" id="schema">
+  <div class="section-head"><h2>18 · Schema Registry, Avro &amp; Evolution</h2><span class="badge adv">advanced</span></div>
+  <table>
+    <tr><th>Format</th><th>Notes</th></tr>
+    <tr><td>Avro</td><td>Compact binary, strong schema evolution rules, the de-facto standard with Confluent Schema Registry</td></tr>
+    <tr><td>JSON Schema</td><td>Human-readable, larger payloads, easier ad-hoc debugging</td></tr>
+    <tr><td>Protobuf</td><td>Compact, strong typing, popular where gRPC is already in use elsewhere in the stack</td></tr>
+  </table>
+  <div class="grid3">
+    <div class="card"><h4>Backward compatible</h4>New schema can read data written with the old schema — safe for consumers to upgrade before producers.</div>
+    <div class="card"><h4>Forward compatible</h4>Old schema can read data written with the new schema — safe for producers to upgrade before consumers.</div>
+    <div class="card"><h4>Full compatible</h4>Both directions hold — the safest default for topics with many independent consumer teams, like <code>order-events</code>.</div>
+  </div>
+  <div class="codewrap"><pre><code>{
+  <span class="tok-str">"type"</span>: <span class="tok-str">"record"</span>,
+  <span class="tok-str">"name"</span>: <span class="tok-str">"OrderCreatedEvent"</span>,
+  <span class="tok-str">"fields"</span>: [
+    {<span class="tok-str">"name"</span>: <span class="tok-str">"eventId"</span>, <span class="tok-str">"type"</span>: <span class="tok-str">"string"</span>},
+    {<span class="tok-str">"name"</span>: <span class="tok-str">"orderId"</span>, <span class="tok-str">"type"</span>: <span class="tok-str">"string"</span>},
+    {<span class="tok-str">"name"</span>: <span class="tok-str">"amount"</span>, <span class="tok-str">"type"</span>: <span class="tok-str">"double"</span>},
+    {<span class="tok-str">"name"</span>: <span class="tok-str">"currency"</span>, <span class="tok-str">"type"</span>: <span class="tok-str">"string"</span>, <span class="tok-str">"default"</span>: <span class="tok-str">"USD"</span>}
+  ]
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <p>Adding <code>currency</code> with a default value is backward <i>and</i> forward compatible — old consumers ignore the new field, old data gets the default when read by the new schema.</p>
+</section>
+
+<!-- ================= 19. CONNECT & STREAMS ================= -->
+<section class="section" id="connect-streams">
+  <div class="section-head"><h2>19 · Kafka Connect &amp; Kafka Streams</h2><span class="badge adv">advanced</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Kafka Connect</h4>A framework for source connectors (Oracle → Kafka via Debezium) and sink connectors (Kafka → Elasticsearch, S3, another Oracle instance). Runs as <b>tasks</b> distributed across <b>workers</b>; a Connect cluster runs in <b>distributed mode</b> for production (fault-tolerant, scalable) or <b>standalone mode</b> for local dev.</div>
+    <div class="card"><h4>Kafka Streams</h4>A Java library (not a separate cluster) for stream processing directly against Kafka topics. <code>KStream</code> is an unbounded record stream; <code>KTable</code> is a changelog-backed table view (latest value per key); <code>GlobalKTable</code> replicates the full table to every instance for join lookups. Supports windowed aggregations and stream-stream / stream-table joins with local state stores backed by a changelog topic for fault tolerance.</div>
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-typ">KStream</span>&lt;String, OrderEvent&gt; orders = builder.stream(<span class="tok-str">"order-events"</span>);
+<span class="tok-typ">KTable</span>&lt;String, Long&gt; ordersPerCustomer = orders
+    .groupBy((key, order) -&gt; order.getCustomerId())
+    .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(5)))
+    .count();</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- ================= 20. SECURITY ================= -->
+<section class="section" id="security">
+  <div class="section-head"><h2>20 · Security</h2><span class="badge adv">advanced</span></div>
+  <div class="grid3">
+    <div class="card"><h4>Encryption — SSL/TLS</h4>Encrypts broker-client and inter-broker traffic. Table stakes for anything on a shared network.</div>
+    <div class="card"><h4>Authentication — SASL</h4><code>SASL/PLAIN</code> (simple, needs TLS to be safe), <code>SASL/SCRAM</code> (salted, hashed, no external IdP needed), <code>SASL/OAUTHBEARER</code> (integrates with an existing OAuth/OIDC provider — common in enterprise SSO setups).</div>
+    <div class="card"><h4>Authorization — ACLs</h4>Fine-grained per-principal permissions: which service can produce to <code>payment-events</code>, which can only consume, which is denied entirely. Applies to producers, consumers, and brokers alike.</div>
+  </div>
+</section>
+
+<!-- ================= 21. PERFORMANCE & CAPACITY ================= -->
+<section class="section" id="performance">
+  <div class="section-head"><h2>21 · Performance &amp; Capacity Planning</h2><span class="badge adv">advanced</span></div>
+  <p>Throughput levers, roughly in order of impact: partition count (parallelism ceiling), <code>batch.size</code> + <code>linger.ms</code> (fewer, bigger network round-trips), <code>compression.type</code> (less network/disk per byte of business data), consumer/producer concurrency, and broker disk/network capacity. Kafka's raw speed comes from sequential disk writes and the OS page cache — the log is append-only, so it avoids the random I/O that kills traditional databases under write load.</p>
+  <div class="callout"><b>Capacity planning worked example</b>
+  <p>500,000 events/sec × 2 KB average = <b>1,000 MB/s</b> raw ingest.</p>
+  <p>Daily raw storage: 1,000 MB/s × 86,400s ≈ <b>84 TB/day</b>.</p>
+  <p>With replication factor 3: <b>≈252 TB/day</b> of total disk consumed across the cluster.</p>
+  <p>With 7-day retention: <b>≈1.76 PB</b> total replicated storage to provision across all brokers, before headroom.</p>
+  <p>Always add 20–30% headroom for compaction/segment overhead, uneven partition skew, and burst traffic above the sustained average.</p></div>
+</section>
+
+<!-- ================= 22. MONITORING & LAG ================= -->
+<section class="section" id="monitoring">
+  <div class="section-head"><h2>22 · Monitoring &amp; Consumer Lag</h2><span class="badge int">intermediate</span></div>
+  <div class="grid3">
+    <div class="card"><h4>Producer metrics</h4><code>record-send-rate</code>, <code>record-error-rate</code>, <code>request-latency</code>, <code>batch-size-avg</code></div>
+    <div class="card"><h4>Consumer metrics</h4>consumer lag (records or time behind the log end), fetch latency, records-consumed-rate</div>
+    <div class="card"><h4>Broker metrics</h4>CPU, disk, network, under-replicated partitions, offline partitions — under-replicated partitions climbing is usually the first sign of broker trouble</div>
+  </div>
+  <p><b>Consumer lag</b> is the gap between the log end offset and the committed offset — it's the queue of unread work. It grows when production outpaces consumption capacity. Fixes, roughly in order of how often they're the actual bottleneck: optimize per-record processing (usually a slow Oracle call), increase consumers up to the partition count, only then increase partition count itself (a heavier operational change), or batch downstream writes instead of one DB call per record.</p>
+</section>
+
+<!-- ================= 23. KUBERNETES & DR ================= -->
+<section class="section" id="k8s-dr">
+  <div class="section-head"><h2>23 · Kubernetes &amp; Disaster Recovery</h2><span class="badge exp">expert</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Kafka on Kubernetes</h4>Brokers run as a <code>StatefulSet</code> (stable network identity + storage per pod), each backed by a <code>PersistentVolume</code>. An operator such as <b>Strimzi</b> automates broker/controller lifecycle, rolling upgrades, and rack-awareness so replicas of a partition don't collapse onto the same physical zone.</div>
+    <div class="card"><h4>Pod failure vs broker failure</h4>A rescheduled pod reattaches to the same PVC and rejoins as the same broker identity — no data loss, just a temporary replication gap while it catches up, same as any follower restart.</div>
+  </div>
+  <table>
+    <tr><th>Concept</th><th>Meaning</th></tr>
+    <tr><td>Multi-AZ</td><td>Replicas spread across availability zones within a region — survives a single AZ outage</td></tr>
+    <tr><td>Multi-region</td><td>Separate clusters per region, kept in sync for regional-outage resilience</td></tr>
+    <tr><td>MirrorMaker 2</td><td>Replicates topics between clusters/regions asynchronously</td></tr>
+    <tr><td>RPO (Recovery Point Objective)</td><td>How much data you can afford to lose — driven by replication lag between regions</td></tr>
+    <tr><td>RTO (Recovery Time Objective)</td><td>How fast you must be back online after a regional failure</td></tr>
+  </table>
+</section>
+
+<!-- ================= 24. PATTERNS & ANTI-PATTERNS ================= -->
+<section class="section" id="patterns">
+  <div class="section-head"><h2>24 · Design Patterns &amp; Anti-Patterns</h2><span class="badge exp">expert</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Saga (choreography)</h4>Each service reacts to the previous service's event and publishes its own (Order → Payment → Inventory → Shipping), with compensating events (<code>PaymentFailed</code> → <code>OrderCancelled</code>) undoing prior steps on failure. No central coordinator; simple, but the overall flow is implicit and harder to trace.</div>
+    <div class="card"><h4>Saga (orchestration)</h4>A dedicated orchestrator service explicitly calls each step and issues compensations. More visible and testable, at the cost of a new central component to keep highly available.</div>
+    <div class="card"><h4>CQRS</h4>Separate write model (Oracle, transactional) from read model (a Kafka-Streams-maintained or Elasticsearch-backed view) — lets read-heavy dashboards scale independently of the transactional path.</div>
+    <div class="card"><h4>Event sourcing</h4>The event log itself is the source of truth (current state is derived by replaying events), rather than events being a side effect of a separately-owned state table. Powerful but a significant design commitment — most services in this course use events as notifications, not as event sourcing.</div>
+  </div>
+  <h3>Anti-patterns</h3>
+  <table>
+    <tr><th>Anti-pattern</th><th>Why it hurts</th></tr>
+    <tr><td>One partition for a high-volume topic</td><td>Hard ceiling of one consumer's worth of parallelism, no matter how large the consumer group is</td></tr>
+    <tr><td>Thousands of partitions "just in case"</td><td>More partitions means more open file handles, longer leader elections, more replication overhead per broker</td></tr>
+    <tr><td>Using Kafka as a system-of-record database</td><td>Kafka is a log, not a queryable store — no ad-hoc queries, no secondary indexes, retention eventually expires data</td></tr>
+    <tr><td>Very large messages (multi-MB)</td><td>Hurts batching efficiency and broker memory; put large payloads in object storage and put a reference in the event instead</td></tr>
+    <tr><td>No schema governance</td><td>One producer's breaking field rename silently corrupts every downstream consumer</td></tr>
+    <tr><td>No DLQ / unbounded retry</td><td>A poison message blocks its whole partition indefinitely</td></tr>
+    <tr><td>Ignoring idempotency</td><td>At-least-once delivery is the practical default — skipping idempotent handling guarantees eventual duplicate processing in production</td></tr>
+    <tr><td>Synchronous request/response over Kafka</td><td>Forces a reply-topic + correlation-id dance to fake what REST already does natively and more simply</td></tr>
+    <tr><td>Poor partition key choice</td><td>A low-cardinality key (e.g. a boolean "isVip" flag) creates hot partitions that a handful of consumers absorb all the load for</td></tr>
+  </table>
+</section>
+
+<!-- ================= 25. INTERVIEW QUESTIONS ================= -->
+<section class="section" id="interview">
+  <div class="section-head"><h2>25 · Interview Question Bank</h2><span class="badge arc">all levels</span></div>
+  <p class="lead">Organized by difficulty. Click a question to expand the answer — short answer first, then the deeper "why" a senior/architect-level interviewer is actually listening for.</p>
+  <div class="filterbar" id="qfilters">
+    <button class="filterbtn active" data-f="all">All</button>
+    <button class="filterbtn" data-f="beg">🟢 Beginner</button>
+    <button class="filterbtn" data-f="int">🔵 Intermediate</button>
+    <button class="filterbtn" data-f="adv">🟠 Advanced</button>
+    <button class="filterbtn" data-f="exp">🔴 Expert</button>
+    <button class="filterbtn" data-f="arc">🟣 Architect</button>
+  </div>
+  <div id="qabank"></div>
+</section>
+
+<!-- ================= 26. SCENARIO QUESTIONS ================= -->
+<section class="section" id="scenarios">
+  <div class="section-head"><h2>26 · Scenario-Based Interview Questions</h2><span class="badge exp">expert</span></div>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">Scenario 1 — Consumer lag jumps from 1,000 to 10 million</div><div class="acc-b">
+      <p><b>Check, in order:</b> (1) Did production suddenly spike (marketing event, batch job)? (2) Did consumer count drop — a crash, a bad deploy, a rebalance storm? (3) Is one specific consumer/partition slow (hot key, hot partition) while others are fine? (4) Is the downstream dependency (Oracle) the bottleneck — check its latency and connection pool saturation. Architect-level answer: don't just add consumers reflexively — first confirm whether the bottleneck is partition-bound (need more partitions + consumers) or dependency-bound (need to fix the slow downstream call, where more consumers just move the queue).</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 2 — Payments are being processed twice</div><div class="acc-b">
+      <p><b>Likely causes:</b> consumer commits the offset after processing but crashes before the commit lands (classic at-least-once redelivery), or the Payment Service itself isn't idempotent on <code>paymentId</code>. <b>Diagnose:</b> check consumer group rebalance history around the incident time, check for duplicate <code>paymentId</code> rows in Oracle. <b>Fix:</b> add a unique constraint on <code>payment_id</code>, treat the constraint violation as "already processed" rather than an error.</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 3 — Orders are missing downstream</div><div class="acc-b">
+      <p><b>Possible causes:</b> producer publish failed silently (check for unhandled exceptions on <code>send()</code>), retention expired before a lagging consumer group caught up, a consumer committed an offset past the record without processing it (bug or manual offset reset gone wrong), or the dual-write problem if outbox/CDC isn't in place.</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 4 — Messages arrive out of order</div><div class="acc-b">
+      <p>Check the partition key strategy first — if related events use different keys they land on different partitions with no relative order. Check for retries without idempotence causing batch reordering. Check whether multiple consumers are processing what the business logic incorrectly assumes is a single ordered stream.</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 5 — Oracle transaction succeeds but the Kafka event is missing</div><div class="acc-b">
+      <p>Textbook dual-write problem. Fix by moving to the Outbox Pattern (event write is part of the same local Oracle transaction) or CDC (event is derived from the committed redo log, so it can't exist without the commit). Add a reconciliation job as a safety net that diffs ORDERS against published events.</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 6 — Broker disk usage hits 90%</div><div class="acc-b">
+      <p><b>Immediate:</b> identify the largest topics by retention × throughput, temporarily reduce retention on non-critical topics, ensure log cleanup isn't stuck. <b>Root cause:</b> under-provisioned capacity planning or an unbounded-retention topic that should have been compacted or time-bounded. <b>Prevention:</b> alerting well before 90%, and capacity planning tied to actual growth trend, not just launch-day estimates.</p></div></div>
+    <div class="acc"><div class="acc-h">Scenario 7 — One consumer is much slower than the others in its group</div><div class="acc-b">
+      <p>Check for a hot partition (uneven key distribution funneling disproportionate volume there), a slow downstream call unique to that consumer's workload (e.g. it happens to process the largest customer's orders), or resource starvation on that specific pod/instance. This is a common trigger for repeated rebalances if the slow consumer keeps missing <code>max.poll.interval.ms</code>.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= 27. SYSTEM DESIGN ================= -->
+<section class="section" id="system-design">
+  <div class="section-head"><h2>27 · System Design Interview — High-Scale Order Processing</h2><span class="badge arc">architect</span></div>
+  <p class="lead">"Design a Kafka-based order platform for 10M orders/day, peak 50,000 orders/sec, 99.99% availability, no duplicate payments, 30-day event retention, Oracle as system of record."</p>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">Capacity estimation</div><div class="acc-b"><p>10M orders/day ≈ 116 orders/sec average, but the stated peak of 50,000/sec is the number to design for — burst capacity, not the average, sizes your partitions and brokers. Assume each order fans out to ~4 downstream events (created, paid, reserved, shipped) → design headroom for ~200,000 events/sec at peak across all topics combined.</p></div></div>
+    <div class="acc"><div class="acc-h">Partition &amp; topic strategy</div><div class="acc-b"><p>Separate topics per event type (<code>order-created</code>, <code>payment-completed</code>, …) rather than one giant topic, so each consumer group only subscribes to what it needs. Partition count sized well above current peak consumer parallelism needs (e.g. 60–100 partitions per high-volume topic) since increasing partitions later is disruptive to key-based ordering. Key every event by <code>orderId</code> so the full order lifecycle stays ordered per order.</p></div></div>
+    <div class="acc"><div class="acc-h">Replication &amp; availability</div><div class="acc-b"><p>Replication factor 3, <code>min.insync.replicas=2</code>, <code>acks=all</code> on financial topics, multi-AZ broker placement with rack awareness so all 3 replicas of a partition are never in the same AZ. This tolerates one full AZ outage without data loss or write unavailability.</p></div></div>
+    <div class="acc"><div class="acc-h">No duplicate payments</div><div class="acc-b"><p>Idempotent producer (prevents producer-retry duplicates) + unique constraint on <code>payment_id</code> in Oracle (prevents application-level duplicate processing from at-least-once redelivery) + Outbox Pattern (prevents the dual-write problem from ever creating a phantom or missing payment event in the first place).</p></div></div>
+    <div class="acc"><div class="acc-h">Failure handling, retry, DLQ</div><div class="acc-b"><p>Exponential backoff retry for transient failures (Oracle connection blip, downstream timeout), immediate DLQ routing for non-retryable exceptions (validation failures), and a reconciliation job comparing ORDERS against published outbox events to catch anything that slipped through.</p></div></div>
+    <div class="acc"><div class="acc-h">Trade-offs to state explicitly</div><div class="acc-b"><p><code>acks=all</code> costs latency for durability — justified for payment/order topics, probably overkill for a high-volume clickstream/analytics topic where <code>acks=1</code> is a reasonable trade. 30-day retention at 200K events/sec peak (using average, not peak, for storage math) is a real storage cost — quantify it rather than hand-waving, using the capacity formula from Section 21.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= 28. CLI CHEAT SHEET ================= -->
+<section class="section" id="cli">
+  <div class="section-head"><h2>28 · Kafka CLI Cheat Sheet</h2><span class="badge int">reference</span></div>
+  <div class="codewrap"><pre><code><span class="tok-com"># Create a topic</span>
+kafka-topics.sh --create --topic order-events --bootstrap-server localhost:9092 \
+  --partitions 12 --replication-factor 3 --config min.insync.replicas=2
+
+<span class="tok-com"># Describe a topic (partitions, leaders, ISR)</span>
+kafka-topics.sh --describe --topic order-events --bootstrap-server localhost:9092
+
+<span class="tok-com"># Delete a topic</span>
+kafka-topics.sh --delete --topic order-events --bootstrap-server localhost:9092
+
+<span class="tok-com"># Produce from the console</span>
+kafka-console-producer.sh --topic order-events --bootstrap-server localhost:9092 \
+  --property "parse.key=true" --property "key.separator=:"
+
+<span class="tok-com"># Consume from the beginning</span>
+kafka-console-consumer.sh --topic order-events --bootstrap-server localhost:9092 \
+  --from-beginning --property print.key=true
+
+<span class="tok-com"># List consumer groups</span>
+kafka-consumer-groups.sh --list --bootstrap-server localhost:9092
+
+<span class="tok-com"># Describe a group — shows lag per partition</span>
+kafka-consumer-groups.sh --describe --group inventory-service --bootstrap-server localhost:9092
+
+<span class="tok-com"># Reset offsets to earliest for a group (dry run first!)</span>
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group inventory-service \
+  --topic order-events --reset-offsets --to-earliest --dry-run
+
+<span class="tok-com"># Alter topic config (e.g. retention)</span>
+kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics \
+  --entity-name order-events --alter --add-config retention.ms=604800000
+
+<span class="tok-com"># Cluster / broker info</span>
+kafka-broker-api-versions.sh --bootstrap-server localhost:9092
+
+<span class="tok-com"># KRaft: check controller quorum status</span>
+kafka-metadata-quorum.sh --bootstrap-server localhost:9092 describe --status</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <div class="callout"><b>Common error → cause</b>
+  <ul>
+    <li><code>LEADER_NOT_AVAILABLE</code> — a leader election is in progress, usually right after a broker restart; transient.</li>
+    <li><code>NOT_ENOUGH_REPLICAS</code> — ISR has shrunk below <code>min.insync.replicas</code>; check for down brokers.</li>
+    <li><code>UnknownTopicOrPartitionException</code> — topic doesn't exist yet, or metadata hasn't propagated to the client.</li>
+    <li><code>CommitFailedException</code> — the consumer took longer than <code>max.poll.interval.ms</code> and was already kicked from the group before it could commit.</li>
+  </ul></div>
+</section>
+
+<!-- ================= 29. TROUBLESHOOTING ================= -->
+<section class="section" id="troubleshooting">
+  <div class="section-head"><h2>29 · Troubleshooting Guide</h2><span class="badge exp">expert</span></div>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">Under-replicated partitions climbing</div><div class="acc-b"><p><b>Symptoms:</b> ISR shrinking, replication lag alerts. <b>Likely causes:</b> a broker under CPU/disk/network pressure, a broker down. <b>Diagnose:</b> <code>kafka-topics.sh --describe --under-replicated-partitions</code>, broker resource metrics. <b>Fix:</b> restore the struggling broker's resources or replace it; <b>prevent</b> with per-broker capacity headroom and alerting well before saturation.</p></div></div>
+    <div class="acc"><div class="acc-h">Rebalance loop</div><div class="acc-b"><p><b>Symptoms:</b> consumer group continuously reassigning, throughput near zero. <b>Cause:</b> processing time exceeding <code>max.poll.interval.ms</code> repeatedly. <b>Fix:</b> lower <code>max.poll.records</code>, speed up per-record processing, or legitimately raise the interval if the work is unavoidably slow (batch jobs).</p></div></div>
+    <div class="acc"><div class="acc-h">Serialization / deserialization errors</div><div class="acc-b"><p><b>Cause:</b> schema mismatch between producer and consumer, or a non-Avro/JSON payload hitting a strict deserializer. <b>Fix:</b> enforce Schema Registry compatibility checks at publish time so incompatible schemas never reach the topic in the first place; route unreadable records to a DLQ rather than crashing the consumer.</p></div></div>
+    <div class="acc"><div class="acc-h">Producer timeouts</div><div class="acc-b"><p><b>Cause:</b> broker overloaded, network issue, or <code>acks=all</code> waiting on a slow/down replica. <b>Diagnose:</b> broker request latency metrics, ISR health. <b>Fix:</b> address the underlying broker/network issue; tune <code>delivery.timeout.ms</code> only after confirming it isn't masking a real capacity problem.</p></div></div>
+    <div class="acc"><div class="acc-h">Oracle connection bottleneck under Kafka load</div><div class="acc-b"><p><b>Symptoms:</b> consumer lag grows even though Kafka itself is healthy. <b>Cause:</b> consumer threads outnumber the Oracle connection pool, or per-record DB writes aren't batched. <b>Fix:</b> batch writes, tune connection pool size to match consumer concurrency, add a write-behind cache where eventual consistency is acceptable.</p></div></div>
+  </div>
+</section>
+
+<!-- ================= 30. REVISION & ROADMAP ================= -->
+<section class="section" id="revision">
+  <div class="section-head"><h2>30 · Quick Revision, Flashcards, Quiz &amp; Roadmap</h2><span class="badge arc">all levels</span></div>
+
+  <div class="tabs" id="revtabs">
+    <div class="tab active" data-t="r10">Kafka in 10 min</div>
+    <div class="tab" data-t="r1h">Kafka in 1 hour</div>
+    <div class="tab" data-t="rcheat">Architect Cheat Sheet</div>
+    <div class="tab" data-t="rroad">Roadmap</div>
+  </div>
+  <div class="tabpanel active" id="r10">
+    <p><b>Kafka</b> is a distributed, durable, replayable log. A <b>topic</b> is split into <b>partitions</b> for parallelism; order is guaranteed only within a partition. Each partition has a <b>leader</b> and <b>replicas</b>; <code>acks</code> + <code>min.insync.replicas</code> control the durability/latency trade-off. <b>Consumer groups</b> split partitions among consumers for parallel reads. Delivery is <b>at-least-once</b> by default — build idempotent consumers, don't fight it. The dual-write problem (DB + Kafka) is solved with the <b>Outbox Pattern</b> or <b>CDC</b>, not with hope.</p>
+  </div>
+  <div class="tabpanel" id="r1h">
+    <p>Add to the 10-minute version: producer internals (serialize → batch → partition → network → ack), consumer internals (fetch → deserialize → process → commit), rebalancing (eager vs cooperative), offset semantics (commit-before vs commit-after trade-offs), Kafka transactions and their real scope (Kafka-to-Kafka, not Kafka+Oracle), replication/ISR mechanics, Schema Registry compatibility modes, retry/DLQ design, and the core anti-patterns (single partition, no DLQ, poor partition key, treating Kafka as a database).</p>
+  </div>
+  <div class="tabpanel" id="rcheat">
+    <table><tr><th>If asked…</th><th>Lead with</th></tr>
+    <tr><td>Why Kafka over REST?</td><td>Decoupling — producer doesn't block on or know about consumers; durable replay for late/new subscribers</td></tr>
+    <tr><td>Why Outbox?</td><td>Solves the dual-write problem by making the event write part of the same local DB transaction</td></tr>
+    <tr><td>Why acks=all + min.insync.replicas=2 on RF=3?</td><td>Tolerates one broker loss with zero data loss, at an acceptable latency cost for financial events</td></tr>
+    <tr><td>Why does Kafka+Oracle exactly-once need care?</td><td>Kafka transactions don't span external systems — outbox/CDC + idempotent writes is the real mechanism</td></tr>
+    <tr><td>How do you choose partition count?</td><td>Target consumer parallelism + expected peak throughput per partition, sized with headroom since raising it later can disturb key-based ordering</td></tr>
+    </table>
+  </div>
+  <div class="tabpanel" id="rroad">
+    <div class="acc-group">
+      <div class="acc open"><div class="acc-h">1. Fundamentals &amp; architecture (prereq: none)</div><div class="acc-b"><p>Sections 1–3. Get the mental model — log, partitions, brokers, producers, consumers — solid before touching config knobs.</p></div></div>
+      <div class="acc"><div class="acc-h">2. Producer/consumer mechanics (prereq: step 1)</div><div class="acc-b"><p>Sections 4–9. Configuration, partitioning, consumer groups, offsets, delivery semantics.</p></div></div>
+      <div class="acc"><div class="acc-h">3. Application integration (prereq: step 2)</div><div class="acc-b"><p>Sections 10–13. The real project, Outbox/CDC, Spring Kafka, transactions — this is where most senior Java devs spend the most time leveling up.</p></div></div>
+      <div class="acc"><div class="acc-h">4. Production operations (prereq: step 3)</div><div class="acc-b"><p>Sections 14–23. Replication, failure scenarios, retry/DLQ, schema evolution, Connect/Streams, security, performance, monitoring, Kubernetes/DR.</p></div></div>
+      <div class="acc"><div class="acc-h">5. Architecture &amp; interview readiness (prereq: step 4)</div><div class="acc-b"><p>Sections 24–29. Patterns/anti-patterns, the full interview bank, scenario questions, system design, CLI, troubleshooting.</p></div></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:34px;">Flashcards</h3>
+  <div id="flashwrap">
+    <div id="flashcard" class="flashcard"><div class="face-a"></div><div class="face-b"></div></div>
+    <div class="flashctrl">
+      <button class="hbtn" onclick="flashPrev()">← prev</button>
+      <button class="hbtn" onclick="flashRandom()">🔀 random</button>
+      <button class="hbtn" onclick="flashNext()">next →</button>
+    </div>
+  </div>
+
+  <h3>Quiz</h3>
+  <div id="quizbox">
+    <div id="quizmeta"></div>
+    <div id="quizq"></div>
+    <div id="quizopts"></div>
+  </div>
+</section>
+
+<footer>KAFKA MASTERCLASS · single-file, no backend, offline-capable · open index.html to run</footer>
+</main>
+</div>
+
+<button id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* ---------------- NAV DATA ---------------- */
+const NAV = [
+ {g:"Foundations", items:[
+   ["fundamentals","Kafka Fundamentals"],["architecture","Kafka Architecture"],["internals","Kafka Internals"]]},
+ {g:"Core Mechanics", items:[
+   ["producer","Producers"],["partitioning","Partitioning"],["consumer","Consumers"],
+   ["consumer-groups","Consumer Groups"],["offsets","Offset Management"],["delivery","Delivery & Idempotency"]]},
+ {g:"Building the Platform", items:[
+   ["project","Real-World Project"],["outbox","Outbox & CDC"],["spring-kafka","Spring Kafka"],["transactions","Transactions & EOS"]]},
+ {g:"Production Engineering", items:[
+   ["replication","Replication & ISR"],["failures","Failure Scenarios"],["retry-dlq","Retry & DLQ"],["ordering","Ordering"],
+   ["schema","Schema Registry & Avro"],["connect-streams","Connect & Streams"],["security","Security"],
+   ["performance","Performance & Capacity"],["monitoring","Monitoring & Lag"],["k8s-dr","Kubernetes & DR"]]},
+ {g:"Architecture", items:[
+   ["patterns","Patterns & Anti-Patterns"]]},
+ {g:"Interview Prep", items:[
+   ["interview","Interview Question Bank"],["scenarios","Scenario Questions"],["system-design","System Design"],
+   ["cli","CLI Cheat Sheet"],["troubleshooting","Troubleshooting"],["revision","Revision & Roadmap"]]}
+];
+let flatIds=[];
+const sidebar=document.getElementById('sidebar');
+let counter=0;
+NAV.forEach(group=>{
+  const lbl=document.createElement('div'); lbl.className='navgroup-label'; lbl.textContent=group.g;
+  sidebar.appendChild(lbl);
+  group.items.forEach(([id,label])=>{
+    flatIds.push(id);
+    const div=document.createElement('div'); div.className='navitem'; div.dataset.id=id;
+    const off=String(counter).padStart(4,'0'); counter++;
+    div.innerHTML=`<span class="off">${off}</span><span>${label}</span>`;
+    div.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+    sidebar.appendChild(div);
+  });
+});
+document.getElementById('offsetMax').textContent=String(counter-1).padStart(4,'0');
+
+/* ---------------- SCROLL: progress + active nav ---------------- */
+const sections=flatIds.map(id=>document.getElementById(id));
+function onScroll(){
+  const doc=document.documentElement;
+  const pct=(doc.scrollTop)/((doc.scrollHeight-doc.clientHeight)||1)*100;
+  document.getElementById('logfill').style.width=pct+'%';
+  document.getElementById('toTop').style.display = doc.scrollTop>600 ? 'block':'none';
+  let activeIdx=0;
+  sections.forEach((s,i)=>{ if(s && s.getBoundingClientRect().top < 140) activeIdx=i; });
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.remove('active'));
+  const active=document.querySelectorAll('.navitem')[activeIdx];
+  if(active){active.classList.add('active'); active.scrollIntoView({block:'nearest'});}
+  document.getElementById('offsetNow').textContent=String(activeIdx).padStart(4,'0');
+}
+document.addEventListener('scroll',onScroll); onScroll();
+
+/* ---------------- theme ---------------- */
+document.getElementById('themeBtn').onclick=()=>{
+  document.body.classList.toggle('light');
+  document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? '☀ theme' : '☾ theme';
+};
+
+/* ---------------- accordion ---------------- */
+document.addEventListener('click',e=>{
+  const h=e.target.closest('.acc-h');
+  if(h){ h.parentElement.classList.toggle('open'); }
+});
+
+/* ---------------- copy code ---------------- */
+function copyCode(btn){
+  const code=btn.previousElementSibling.innerText;
+  navigator.clipboard.writeText(code).then(()=>{ const t=btn.textContent; btn.textContent='copied'; setTimeout(()=>btn.textContent=t,1200); });
+}
+
+/* ---------------- tabs (revision) ---------------- */
+document.querySelectorAll('#revtabs .tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('#revtabs .tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.t).classList.add('active');
+  };
+});
+
+/* ---------------- search ---------------- */
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.section').forEach(sec=>{
+    if(!q){ sec.classList.remove('hidden-by-search'); return; }
+    const match=sec.innerText.toLowerCase().includes(q);
+    sec.classList.toggle('hidden-by-search',!match);
+  });
+});
+
+/* ================= INTERVIEW Q&A BANK ================= */
+const QA=[
+ {l:'beg',q:'What is Kafka?',a:'A distributed, durable, publish-subscribe event log. Producers append records to topics; consumers read them independently, at their own pace, with records retained for a configured window rather than deleted on read.'},
+ {l:'beg',q:'Why is Kafka fast?',a:'Sequential disk writes (append-only log) instead of random I/O, OS page cache for reads that are close to the write, zero-copy transfer from disk to network socket, and client-side batching + compression to reduce the number and size of network round-trips.'},
+ {l:'beg',q:'What is a topic?',a:'A named, logically categorized stream of events, e.g. order-events. Physically it is split into one or more partitions.'},
+ {l:'beg',q:'What is a partition?',a:'An ordered, append-only, immutable log segment that is a shard of a topic. It is the unit of parallelism and the unit within which Kafka guarantees ordering.'},
+ {l:'beg',q:'What is an offset?',a:'A sequential integer identifying a record\'s position within its partition. Offsets are per-partition, not global to the topic.'},
+ {l:'beg',q:'What is a consumer group?',a:'A set of consumers that cooperatively split a topic\'s partitions so each partition is read by exactly one consumer in the group at a time, enabling horizontal read scaling.'},
+ {l:'beg',q:'How does Kafka maintain ordering?',a:'Only within a single partition — records are appended and read in write order there. There is no ordering guarantee across partitions or across a whole topic.'},
+ {l:'beg',q:'What happens when a consumer crashes?',a:'The group coordinator detects the missed heartbeats after session.timeout.ms, removes it from the group, and reassigns its partitions to the remaining live consumers via a rebalance.'},
+ {l:'beg',q:'What happens when a broker crashes?',a:'Partitions it led fail over to an in-sync replica on another broker via the controller; partitions it followed simply lose one replica until it returns and catches up.'},
+ {l:'beg',q:'What is ISR?',a:'In-Sync Replicas — the subset of a partition\'s replicas that are fully caught up with the leader right now. Only ISR members are eligible to become leader without data loss.'},
+ {l:'beg',q:'What is replication factor?',a:'The total number of copies of a partition kept across brokers, commonly 3 in production, so the cluster tolerates broker failures without losing data.'},
+ {l:'beg',q:'What is min.insync.replicas?',a:'The minimum ISR size an acks=all write requires to succeed. With RF=3 and min.insync.replicas=2, the cluster tolerates one broker down and still accepts durable writes.'},
+ {l:'beg',q:'What is acks=all?',a:'The producer waits for every current in-sync replica (bounded by min.insync.replicas) to acknowledge the write before considering it successful — the strongest built-in durability setting.'},
+ {l:'int',q:'How does Kafka achieve fault tolerance?',a:'Through replication (multiple copies per partition across brokers), leader election on failure, and consumer group rebalancing, combined with a controller (KRaft quorum) that tracks cluster metadata and orchestrates failover.'},
+ {l:'int',q:'How does Kafka achieve high throughput?',a:'Sequential I/O, page-cache-backed reads, producer-side batching and compression, and partition-level parallelism that lets throughput scale roughly linearly with partition and consumer count.'},
+ {l:'int',q:'How does Kafka handle duplicates?',a:'The idempotent producer (sequence numbers per producer session) removes duplicates caused by producer-side retries. It does not remove application-level duplicates from at-least-once redelivery — that requires an idempotent consumer.'},
+ {l:'int',q:'What is an idempotent producer?',a:'A producer mode (enable.idempotence=true) where each batch carries a producer ID and sequence number so the broker can detect and drop a retried duplicate of a batch it already wrote.'},
+ {l:'int',q:'What is exactly-once semantics in Kafka?',a:'A guarantee, achievable within Kafka (consume-transform-produce pipelines via transactions), that each input record affects the output exactly once even across retries/failures. It does not automatically extend to non-Kafka systems like a database.'},
+ {l:'int',q:'How does consumer rebalancing work?',a:'The group coordinator triggers a rebalance on membership change (join, leave, crash, or partition count change), and partitions are reassigned per the group\'s assignment strategy — eager (full stop-the-world reassignment) or cooperative (incremental, only affected partitions move).'},
+ {l:'int',q:'What causes consumer lag?',a:'Production outpacing consumption — too few consumers/partitions for the load, slow per-record processing (often a downstream DB call), or a temporary dip in consumer availability (rebalances, crashes).'},
+ {l:'int',q:'How do you solve consumer lag?',a:'Diagnose first: is it partition-bound (add consumers up to the partition count, or add partitions) or dependency-bound (optimize/batch the slow downstream call)? Blindly adding consumers past partition count does nothing.'},
+ {l:'int',q:'How many consumers can a consumer group usefully have?',a:'At most the number of partitions on the topic(s) it subscribes to — extra consumers beyond that sit idle.'},
+ {l:'int',q:'How do you choose partition count?',a:'Based on target peak throughput divided by realistic per-partition throughput, and the consumer parallelism you need — sized with headroom, since increasing it later can disturb key-based ordering for existing keys.'},
+ {l:'int',q:'How do you handle poison messages?',a:'Classify the failure as retryable vs non-retryable; route non-retryable failures straight to a DLQ instead of retrying indefinitely, which would otherwise block the whole partition behind that record.'},
+ {l:'int',q:'How do you implement retry in Spring Kafka?',a:'A DefaultErrorHandler with a BackOff policy (fixed or exponential) wraps listener invocation; after retries are exhausted, a DeadLetterPublishingRecoverer republishes the record to a .DLT topic.'},
+ {l:'int',q:'What is a DLQ?',a:'Dead Letter (Topic) Queue — a topic that unprocessable records are routed to after exhausting retries, so they can be inspected/replayed later without blocking normal processing.'},
+ {l:'adv',q:'How do you guarantee database + Kafka consistency?',a:'You don\'t get it for free — use the Outbox Pattern (event write is part of the same local DB transaction as the business write) or CDC (event derived directly from the committed transaction log), plus idempotent downstream consumers.'},
+ {l:'adv',q:'Explain the Outbox Pattern.',a:'Write the business row and an outbox event row in one local database transaction, then have a separate publisher (poller or CDC) reliably ship outbox rows to Kafka — atomicity comes from the local transaction, not from a distributed one.'},
+ {l:'adv',q:'Explain CDC.',a:'Change Data Capture tails a database\'s transaction/redo log and emits an event per row change, near-real-time, without polling or app-level publish code — commonly implemented with Debezium on Kafka Connect.'},
+ {l:'adv',q:'Kafka transactions vs database transactions?',a:'Both provide atomicity within their own system. A Kafka transaction spans only Kafka topics/offsets; a database transaction spans only that database. Neither one alone spans "write to Oracle and publish to Kafka" — that combination needs Outbox/CDC.'},
+ {l:'adv',q:'Kafka vs RabbitMQ?',a:'Kafka retains records for replay by multiple independent consumer groups and excels at high-throughput ordered streams; RabbitMQ deletes on ack, and offers richer per-message routing/priority — better fit for complex task-queue routing than for a durable event backbone.'},
+ {l:'adv',q:'Kafka vs REST?',a:'REST is synchronous request/response with tight coupling between caller and callee availability; Kafka is asynchronous, decoupled, and durable — the producer doesn\'t need the consumer to be up at publish time.'},
+ {l:'adv',q:'Kafka vs database polling?',a:'Polling wastes cycles when idle and creates DB lock contention under load; Kafka\'s pull-based long-poll scales via consumer groups with no added load on the source database.'},
+ {l:'adv',q:'Kafka Streams vs Kafka Consumer?',a:'A plain consumer gives you the raw poll/process/commit loop; Kafka Streams is a higher-level library on top of the consumer/producer APIs adding stateful operations — joins, aggregations, windowing — with fault-tolerant local state backed by changelog topics.'},
+ {l:'adv',q:'KStream vs KTable?',a:'KStream is an unbounded stream of independent records (every record matters); KTable is a changelog-backed table view representing the latest value per key (new records for the same key replace, not append).'},
+ {l:'adv',q:'How does Kafka replication work?',a:'Followers continuously fetch from the partition leader\'s log and apply records in order; a follower joins the ISR once it is fully caught up, and drops out if it falls behind the configured replication lag threshold.'},
+ {l:'adv',q:'What happens when a partition leader fails?',a:'The controller (KRaft quorum) detects the failure and promotes an in-sync replica to leader; clients refresh metadata and redirect requests to the new leader, with a brief availability gap for that partition during election.'},
+ {l:'exp',q:'How does KRaft work?',a:'A subset of brokers act as controllers forming a Raft consensus quorum that stores cluster metadata (topics, partitions, ISR, configs) as a replicated log — replacing ZooKeeper\'s external coordination with an internal, Kafka-native mechanism.'},
+ {l:'exp',q:'ZooKeeper vs KRaft?',a:'ZooKeeper mode needs a separate ensemble to operate and has a practical partition-count ceiling; KRaft is built into the brokers/controllers, offers faster controller failover via Raft, and scales to far more partitions — it is the modern default.'},
+ {l:'exp',q:'How do you design for 99.99% availability with Kafka?',a:'Replication factor ≥3 with rack/AZ awareness so replicas never collapse into one failure domain, min.insync.replicas tuned to survive a single broker/AZ loss, health-based alerting well ahead of resource saturation, and a tested failover runbook — availability is an operational discipline, not just a config value.'},
+ {l:'arc',q:'Why would you choose Outbox over CDC, or vice versa?',a:'Outbox gives you full control over the event contract and needs no extra infrastructure beyond a table and a lightweight publisher — good when you want a deliberate, decoupled event schema. CDC needs Kafka Connect/Debezium and log-mining privileges but captures every change automatically, including ones outside your application code — good when completeness matters more than event-shape control, or when touching legacy tables you can\'t add application code to.'},
+ {l:'arc',q:'How would you defend a chosen partition count and replication factor in a design review?',a:'Tie both numbers to stated requirements — partition count to peak throughput ÷ realistic per-partition throughput plus target consumer parallelism; replication factor and min.insync.replicas to the stated availability target and the failure domains (broker, AZ) you must survive. Numbers picked without traceable requirements are the first thing a good reviewer will push on.'},
+];
+const qabank=document.getElementById('qabank');
+function renderQA(filter){
+  qabank.innerHTML='';
+  QA.filter(x=>filter==='all'||x.l===filter).forEach((item,i)=>{
+    const div=document.createElement('div'); div.className='qa';
+    const badgeClass={beg:'beg',int:'int',adv:'adv',exp:'exp',arc:'arc'}[item.l];
+    const badgeText={beg:'🟢 beginner',int:'🔵 intermediate',adv:'🟠 advanced',exp:'🔴 expert',arc:'🟣 architect'}[item.l];
+    div.innerHTML=`<div class="qa-q"><span>${item.q}</span><span class="qn">${badgeText}</span></div><div class="qa-a">${item.a}</div>`;
+    div.querySelector('.qa-q').onclick=()=>div.classList.toggle('open');
+    qabank.appendChild(div);
+  });
+}
+renderQA('all');
+document.querySelectorAll('#qfilters .filterbtn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#qfilters .filterbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); renderQA(b.dataset.f);
+  };
+});
+
+/* ================= FLASHCARDS ================= */
+const CARDS=[
+ ["Partition","An ordered, append-only shard of a topic — the unit of parallelism and of ordering."],
+ ["Offset","A record's sequential position within its partition."],
+ ["ISR","In-Sync Replicas — replicas fully caught up with the partition leader."],
+ ["acks=all","Producer waits for all in-sync replicas (bounded by min.insync.replicas) before considering a write successful."],
+ ["Idempotent producer","Client mode that lets the broker detect and drop duplicate batches caused by producer retries."],
+ ["Outbox Pattern","Writes the business row and event row in one local DB transaction; a separate publisher ships events to Kafka."],
+ ["Consumer lag","The gap between the log end offset and a consumer group's committed offset — its backlog of unread work."],
+ ["Cooperative rebalance","Only the specific partitions that must move are revoked, instead of the whole group stopping."],
+ ["min.insync.replicas","Minimum ISR size required for an acks=all write to succeed."],
+ ["DLQ","Dead Letter Topic — where records are routed after exhausting retries, so they don't block the partition."],
+ ["Backward compatible schema","A new schema can read data written with the old schema — safe for consumers to upgrade first."],
+ ["KTable","A changelog-backed table view in Kafka Streams representing the latest value per key."],
+];
+let flashIdx=0;
+function renderFlash(){
+  const c=document.getElementById('flashcard');
+  c.classList.remove('flip');
+  c.querySelector('.face-a').textContent=CARDS[flashIdx][0];
+  c.querySelector('.face-b').textContent=CARDS[flashIdx][1];
+}
+document.getElementById('flashcard').onclick=function(){ this.classList.toggle('flip'); };
+function flashNext(){ flashIdx=(flashIdx+1)%CARDS.length; renderFlash(); }
+function flashPrev(){ flashIdx=(flashIdx-1+CARDS.length)%CARDS.length; renderFlash(); }
+function flashRandom(){ flashIdx=Math.floor(Math.random()*CARDS.length); renderFlash(); }
+renderFlash();
+
+/* ================= QUIZ ================= */
+const QUIZ=[
+ {q:"A topic with 1 partition is read by a consumer group with 4 consumers. How many consumers actively process records?",
+  opts:["1","2","4","0"], correct:0, exp:"Kafka assigns at most one consumer per partition within a group — the other 3 sit idle."},
+ {q:"Producer sets acks=1. The leader writes the record and acks, then crashes before followers replicate it. What happens?",
+  opts:["The record is guaranteed durable","The record can be lost","The producer automatically retries on another broker","Followers roll back the leader's write"],
+  correct:1, exp:"acks=1 only waits for the leader, not the ISR — if the leader dies before replication, the acknowledged write can vanish."},
+ {q:"Which pattern solves the 'DB commit succeeds but Kafka publish fails' dual-write problem?",
+  opts:["Increasing acks to all","The Outbox Pattern","Increasing replication factor","Enabling idempotent producer"],
+  correct:1, exp:"Outbox (or CDC) makes the event write part of the same local database transaction, removing the window where one succeeds and the other doesn't."},
+ {q:"What does Kafka guarantee about ordering?",
+  opts:["Global order across an entire topic","Order within a single partition only","Order across all topics a producer writes to","No ordering guarantees at all"],
+  correct:1, exp:"Ordering is a per-partition guarantee — that's exactly why partition key choice matters so much."},
+ {q:"A consumer commits its offset, then crashes before finishing the business logic for that record. On restart, what happens to that record?",
+  opts:["It is reprocessed automatically","It is skipped — this is 'at most once' behavior for that record","Kafka retries sending it 3 times","The consumer group is deleted"],
+  correct:1, exp:"Committing before processing risks silent skips if a crash happens between the commit and the actual work — this is why 'commit after processing' plus idempotency is the safer default."},
+ {q:"Kafka's transactional producer guarantees exactly-once for which scenario?",
+  opts:["Kafka topic → Kafka topic pipelines","Any write to an external database","Kafka topic → external REST API","Consumer offset commits to any datastore"],
+  correct:0, exp:"Kafka transactions are scoped to Kafka itself; external systems like a database need Outbox/CDC, not Kafka transactions, for consistency."},
+];
+let quizIdx=0, quizScore=0, quizAnswered=false;
+function renderQuiz(){
+  quizAnswered=false;
+  document.getElementById('quizmeta').textContent=`Question ${quizIdx+1} of ${QUIZ.length} · score ${quizScore}`;
+  const item=QUIZ[quizIdx];
+  document.getElementById('quizq').innerHTML=`<p style="font-size:15px;font-weight:600;">${item.q}</p>`;
+  const optsDiv=document.getElementById('quizopts'); optsDiv.innerHTML='';
+  item.opts.forEach((opt,i)=>{
+    const b=document.createElement('button'); b.className='quiz-opt'; b.textContent=opt;
+    b.onclick=()=>{
+      if(quizAnswered) return; quizAnswered=true;
+      document.querySelectorAll('.quiz-opt').forEach((el,j)=>{
+        if(j===item.correct) el.classList.add('correct');
+        else if(j===i) el.classList.add('wrong');
+      });
+      if(i===item.correct) quizScore++;
+      const exp=document.createElement('p'); exp.style.cssText='margin-top:10px;color:var(--muted);font-size:13px;';
+      exp.textContent=item.exp+"  ";
+      const next=document.createElement('button'); next.className='hbtn'; next.style.marginLeft='6px';
+      next.textContent = quizIdx<QUIZ.length-1 ? 'Next question →' : 'Restart quiz';
+      next.onclick=()=>{ quizIdx = quizIdx<QUIZ.length-1 ? quizIdx+1 : 0; if(quizIdx===0) quizScore=0; renderQuiz(); };
+      exp.appendChild(next);
+      optsDiv.appendChild(exp);
+      document.getElementById('quizmeta').textContent=`Question ${quizIdx+1} of ${QUIZ.length} · score ${quizScore}`;
+    };
+    optsDiv.appendChild(b);
+  });
+}
+renderQuiz();
+</script>
+</body>
+</html>
