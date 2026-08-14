@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Microservices Architect Masterclass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#0a0e14; --panel:#111722; --panel-2:#161d2b; --line:#242e40;
+  --text:#dfe6ef; --muted:#8996a8;
+  --blue:#4f8ff7; --blue-dim:#1f3a63;
+  --green:#3ecf8e; --amber:#e0a340; --red:#e2685c; --purple:#b78cf0;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif; --disp:'Space Grotesk',sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;}
+body.light{--bg:#f5f6f8;--panel:#ffffff;--panel-2:#eef0f4;--line:#dde1e8;--text:#1a1f28;--muted:#5a6472;}
+::selection{background:var(--blue-dim);color:#fff;}
+a{color:var(--blue);}
+code,pre{font-family:var(--mono);}
+h1,h2,h3,h4{font-family:var(--disp);letter-spacing:-0.01em;margin-top:0;}
+
+#bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:var(--line);}
+#bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--blue-dim),var(--blue));transition:width .15s linear;}
+
+header{position:sticky;top:3px;z-index:100;display:flex;align-items:center;gap:16px;
+  background:rgba(10,14,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 20px;}
+body.light header{background:rgba(245,246,248,.92);}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:15px;white-space:nowrap;}
+.brand .mark{width:11px;height:11px;border:2px solid var(--blue);border-radius:2px;transform:rotate(45deg);}
+.brand small{color:var(--muted);font-weight:400;font-size:11px;display:block;letter-spacing:.06em;font-family:var(--sans);}
+#search{flex:1;max-width:440px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:13px;}
+#search:focus{outline:1px solid var(--blue);}
+.hbtn{background:transparent;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:4px;
+  cursor:pointer;font-family:var(--mono);font-size:12px;}
+.hbtn:hover{border-color:var(--blue);color:var(--blue);}
+#partIndicator{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+#partIndicator b{color:var(--blue);}
+
+#shell{display:flex;max-width:1500px;margin:0 auto;}
+nav#sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--line);height:calc(100vh - 51px);
+  position:sticky;top:54px;overflow-y:auto;padding:14px 0 60px;}
+nav#sidebar::-webkit-scrollbar{width:6px;}
+nav#sidebar::-webkit-scrollbar-thumb{background:var(--line);}
+.navgroup-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);
+  padding:14px 18px 6px;text-transform:uppercase;}
+.navitem{display:flex;gap:10px;align-items:baseline;padding:6px 18px;font-size:13px;color:var(--muted);
+  cursor:pointer;border-left:2px solid transparent;}
+.navitem:hover{color:var(--text);background:var(--panel-2);}
+.navitem.active{color:var(--blue);border-left-color:var(--blue);background:var(--panel-2);}
+.navitem .off{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:26px;}
+.navitem.active .off{color:var(--blue);}
+
+main{flex:1;min-width:0;padding:0 44px 100px;}
+.section{padding-top:70px;margin-top:-40px;}
+.section-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);
+  padding-bottom:14px;margin-bottom:22px;}
+.section-head h2{font-size:25px;margin:0;}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:3px;font-weight:600;}
+.badge.f{background:#173a24;color:#7fd996;}
+.badge.d{background:#122a45;color:#6fb7e8;}
+.badge.a{background:#3a2a10;color:#e0a340;}
+.badge.x{background:#3a1616;color:#e2685c;}
+.badge.arc{background:#2a1a40;color:#c69bef;}
+.lead{color:var(--muted);font-size:15px;max-width:820px;}
+
+.callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);
+  padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:14px;}
+.callout.green{border-left-color:var(--green);}
+.callout.red{border-left-color:var(--red);}
+.callout.amber{border-left-color:var(--amber);}
+.callout.purple{border-left-color:var(--purple);}
+.callout b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);
+  display:block;margin-bottom:6px;}
+.callout.green b{color:var(--green);} .callout.red b{color:var(--red);}
+.callout.amber b{color:var(--amber);} .callout.purple b{color:var(--purple);}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.3px;}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+tr:hover td{background:var(--panel);}
+
+pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;
+  overflow-x:auto;font-size:12.6px;margin:14px 0;}
+.codewrap{position:relative;}
+.copybtn{position:absolute;top:8px;right:8px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+  font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;}
+.copybtn:hover{color:var(--blue);border-color:var(--blue);}
+.tok-kw{color:#c586c0;} .tok-str{color:#ce9178;} .tok-com{color:#6a9955;} .tok-typ{color:#4ec9b0;} .tok-ann{color:#dcdcaa;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;}
+.card h4{margin:0 0 8px;font-size:14px;color:var(--blue);}
+
+.acc{border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--panel);}
+.acc-h{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:13.3px;font-weight:600;}
+.acc-h:hover{color:var(--blue);}
+.acc-h::after{content:'+';color:var(--blue);font-size:16px;}
+.acc.open .acc-h::after{content:'–';}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .25s ease;padding:0 16px;}
+.acc.open .acc-b{max-height:3200px;padding:0 16px 16px;}
+.acc-b p:first-child{margin-top:0;}
+
+.mermaid{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0;
+  overflow-x:auto;text-align:center;}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 0;flex-wrap:wrap;}
+.tab{padding:8px 14px;font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;}
+.tab.active{color:var(--blue);border-color:var(--blue);}
+.tabpanel{display:none;padding:14px 0;}
+.tabpanel.active{display:block;}
+
+.qa{border:1px solid var(--line);border-radius:8px;margin:10px 0;background:var(--panel);}
+.qa-q{padding:13px 16px;cursor:pointer;font-size:13.8px;font-weight:600;display:flex;justify-content:space-between;gap:10px;}
+.qa-q .qn{color:var(--muted);font-family:var(--mono);font-size:11px;white-space:nowrap;}
+.qa-a{display:none;padding:0 16px 16px;font-size:13.3px;color:var(--muted);}
+.qa.open .qa-a{display:block;}
+.qa.open .qa-q{color:var(--blue);}
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.filterbtn{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:6px 12px;
+  border-radius:20px;font-family:var(--mono);font-size:11px;cursor:pointer;}
+.filterbtn.active{border-color:var(--blue);color:var(--blue);}
+
+#quizbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;}
+.quiz-opt{display:block;width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+  padding:10px 14px;border-radius:6px;margin:6px 0;cursor:pointer;font-size:13.3px;}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{border-color:var(--green);background:#0f2a20;color:#7fe0b8;}
+.quiz-opt.wrong{border-color:var(--red);background:#2a1414;color:#f2a89e;}
+#quizmeta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:10px;}
+
+#flashwrap{max-width:540px;margin:16px auto;}
+.flashcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;height:220px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;
+  font-size:15px;position:relative;}
+.flashcard .face-b{display:none;color:var(--blue);font-size:13.5px;}
+.flashcard.flip .face-a{display:none;}
+.flashcard.flip .face-b{display:block;}
+.flashctrl{display:flex;justify-content:center;gap:10px;margin-top:12px;}
+
+.checklist{list-style:none;padding:0;margin:10px 0;}
+.checklist li{padding:7px 0 7px 30px;position:relative;font-size:13.8px;border-bottom:1px dashed var(--line);}
+.checklist li::before{content:'☐';position:absolute;left:0;color:var(--blue);font-size:16px;}
+
+footer{border-top:1px solid var(--line);padding:40px 20px;text-align:center;color:var(--muted);
+  font-family:var(--mono);font-size:11px;}
+#toTop{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--line);color:var(--muted);
+  width:38px;height:38px;border-radius:50%;cursor:pointer;display:none;font-family:var(--mono);z-index:150;}
+#toTop:hover{border-color:var(--blue);color:var(--blue);}
+.hidden-by-search{display:none !important;}
+
+.hero{padding:30px 0 10px;}
+.hero h1{font-size:34px;margin-bottom:6px;}
+.hero .sub{font-family:var(--mono);color:var(--blue);font-size:14px;margin-bottom:14px;}
+.hero .stack{color:var(--muted);font-size:13px;font-family:var(--mono);margin-bottom:20px;}
+
+@media(max-width:1000px){nav#sidebar{display:none;} main{padding:0 18px 100px;}}
+</style>
+</head>
+<body>
+
+<div id="bar"><div id="fill"></div></div>
+
+<header>
+  <div class="brand"><span class="mark"></span><div>MICROSERVICES ARCHITECT<small>developer → architect · part 0 of 38</small></div></div>
+  <input id="search" placeholder="Search patterns, terms, questions…" />
+  <span id="partIndicator">part <b id="partNow">00</b> / <span id="partMax">38</span></span>
+  <button class="hbtn" id="themeBtn">☾ theme</button>
+</header>
+
+<div id="shell">
+<nav id="sidebar"></nav>
+<main id="main">
+
+<section class="section hero" id="intro">
+  <h1>Java Microservices Architect Masterclass</h1>
+  <div class="sub">Java 21 + Spring Boot 3 + Kafka + Oracle + Redis + Docker + Kubernetes + AWS</div>
+  <div class="stack">From Java Developer → Microservices Expert → Solution Architect</div>
+  <div class="mermaid">
+graph TD
+A[Java / Spring Foundation] --> B[Microservices Fundamentals]
+B --> C[Service Design / DDD]
+C --> D[REST & Communication]
+D --> E[Kafka & Event-Driven Architecture]
+E --> F[Distributed Systems]
+F --> G[Resilience]
+G --> H[Security]
+H --> I[Observability]
+I --> J[Docker]
+J --> K[Kubernetes]
+K --> L[AWS]
+L --> M[CI/CD]
+M --> N[System Design]
+N --> O[Production Architecture]
+O --> P[Architect]
+  </div>
+  <p class="lead">Every part of this course builds the same system: the <b>E-Commerce Order Management Platform</b> — Customer, Product, Order, Payment, Inventory and Notification services, connected synchronously through an API Gateway and asynchronously through Kafka, deployed on Kubernetes on AWS. Concepts compound on each other instead of appearing as disconnected examples.</p>
+</section>
+
+<!-- 1 -->
+<section class="section" id="fundamentals">
+  <div class="section-head"><h2>01 · Microservices Fundamentals</h2><span class="badge f">foundation</span></div>
+  <div class="mermaid">
+graph LR
+A[Monolith] --> B[Modular Monolith] --> C[SOA] --> D[Microservices] --> E[Cloud-Native Distributed Systems]
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>What is a monolith?</h4>A single deployable unit containing all business capabilities — Order, Payment, Inventory logic all compiled, deployed, and scaled together against one database.</div>
+    <div class="card"><h4>Problems with monoliths at scale</h4>Every change requires a full redeploy; one team's bug can crash unrelated features; the whole app scales even if only one module is hot; the codebase grows harder to reason about as headcount grows.</div>
+    <div class="card"><h4>Modular monolith</h4>Same single deployable, but with enforced internal module boundaries (package-private APIs, no cross-module table access). Often the right <i>first</i> step before microservices — you get boundary discipline without distributed-systems cost.</div>
+    <div class="card"><h4>SOA vs Microservices</h4>SOA centralizes integration logic in an Enterprise Service Bus and often shares a canonical data model; microservices push integration logic to the edges (smart endpoints, dumb pipes) and insist on independent data ownership per service.</div>
+  </div>
+  <h3>Conway's Law &amp; organizational impact</h3>
+  <div class="callout"><b>Conway's Law</b>"Organizations design systems that mirror their own communication structure." In practice: if Order, Payment, and Inventory are owned by three separate teams, you'll naturally get three separate services — and if you try to force a different architecture than your team structure, the architecture loses. Team ownership boundaries and service boundaries should be designed together, not independently.</div>
+  <table>
+    <tr><th></th><th>Monolith</th><th>Microservices</th></tr>
+    <tr><td>Deployment</td><td>One unit, one pipeline</td><td>Independent per service</td></tr>
+    <tr><td>Scaling</td><td>Scale the whole app</td><td>Scale only the hot service</td></tr>
+    <tr><td>Data ownership</td><td>Usually one shared schema</td><td>Database-per-service</td></tr>
+    <tr><td>Failure blast radius</td><td>One bug can take down everything</td><td>Isolated, if resilience patterns are applied</td></tr>
+    <tr><td>Operational complexity</td><td>Low</td><td>High — needs observability, service discovery, orchestration</td></tr>
+    <tr><td>Team autonomy</td><td>Low — shared codebase, coordinated releases</td><td>High — independent release cadence per team</td></tr>
+  </table>
+  <div class="callout red"><b>When NOT to use microservices</b>Small team (fewer than ~8–10 engineers), unclear or rapidly-changing domain boundaries, low traffic that doesn't need independent scaling, or a team without operational maturity in containers/observability/on-call. Microservices trade development simplicity for operational flexibility — that trade is not free, and a distributed monolith (all the deployment complexity, none of the independence) is worse than the monolith you started with.</div>
+  <h3>Microservices maturity model</h3>
+  <p>Level 0: monolith. Level 1: modular monolith with clear internal boundaries. Level 2: a handful of coarse-grained services split along clear bounded contexts. Level 3: full microservices with independent databases, CI/CD, and on-call ownership per team. Level 4: event-driven, cloud-native, self-healing, observable at the SLO level. Most organizations should stop advancing a level before they think they should — premature Level 3/4 adoption is the most common cause of the "distributed monolith" anti-pattern.</p>
+</section>
+
+<!-- 2 -->
+<section class="section" id="designing">
+  <div class="section-head"><h2>02 · Designing Microservices — DDD &amp; Boundaries</h2><span class="badge f">foundation</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Bounded Context</h4>A boundary within which a domain model and its terminology are consistent. "Customer" in the Order context (shipping address, order history) is a different model than "Customer" in the Marketing context (segments, campaigns) — forcing one shared "Customer" entity across both is where shared-database pain begins.</div>
+    <div class="card"><h4>Aggregates, Entities, Value Objects</h4>An <b>Aggregate</b> (e.g. Order + its OrderLines) is a consistency boundary — changes inside it are transactional; changes across aggregates are eventual. An <b>Entity</b> has identity and a lifecycle (Order). A <b>Value Object</b> has no identity, only value (Money, Address) and is immutable.</div>
+    <div class="card"><h4>Domain Services vs Application Services</h4>A <b>Domain Service</b> holds business logic that doesn't naturally belong to one entity (e.g. pricing rules spanning several products). An <b>Application Service</b> orchestrates use cases — calling domain logic, repositories, and publishing events — but holds no business rules itself.</div>
+    <div class="card"><h4>Anti-Corruption Layer</h4>A translation layer at a service boundary that converts an external or legacy model into your own bounded context's model, preventing another team's (or a legacy system's) domain concepts from leaking in and corrupting yours.</div>
+  </div>
+  <h3>Bad design: shared database</h3>
+  <div class="mermaid">
+graph TD
+CS[Customer Service] --> DB[(Shared Oracle DB)]
+OS[Order Service] --> DB
+PS[Payment Service] --> DB
+  </div>
+  <div class="callout red"><b>Why this is dangerous</b>Any service can read or write any other service's tables, so schema changes become cross-team coordination events; a slow query in Payment Service can lock rows Order Service needs; there's no way to reason about which service "owns" a piece of data; and it becomes a distributed monolith — you pay for the operational cost of microservices while keeping the tight coupling of a single database.</div>
+  <h3>Better design: database-per-service</h3>
+  <div class="mermaid">
+graph LR
+CS[Customer Service] --> CDB[(Customer DB)]
+OS[Order Service] --> ODB[(Order DB)]
+PS[Payment Service] --> PDB[(Payment DB)]
+  </div>
+  <p>Each service owns its schema exclusively — no other service ever queries it directly. Cross-service data needs are satisfied through the service's API or through events, not through a JOIN. This is the single most important structural rule in microservices design: <b>if you can still JOIN across two services' tables, they are not actually separate services.</b></p>
+</section>
+
+<!-- 3 -->
+<section class="section" id="project">
+  <div class="section-head"><h2>03 · The Running Project — E-Commerce Order Management Platform</h2><span class="badge f">foundation</span></div>
+  <div class="mermaid">
+graph TD
+GW[API Gateway]
+GW --> CUST[Customer Service]
+GW --> PROD[Product Service]
+GW --> ORD[Order Service]
+ORD -->|Kafka: OrderCreated| PAY[Payment Service]
+ORD -->|Kafka: OrderCreated| INV[Inventory Service]
+PAY -->|Kafka: PaymentCompleted| ORD
+INV -->|Kafka: InventoryReserved| SHIP[Shipping]
+PAY -->|Kafka events| NOTIF[Notification Service]
+INV -->|Kafka events| NOTIF
+  </div>
+  <p>Stack used consistently: Java 21, Spring Boot 3.x, Spring Cloud Gateway, Spring Data JPA/Hibernate, Oracle (system of record), Redis (caching), Kafka (async integration), Docker, Kubernetes, AWS (EKS, RDS, MSK, ElastiCache, S3). Every later part — resilience, security, observability, Kubernetes, AWS — is applied to this same set of services rather than introduced in isolation.</p>
+</section>
+
+<!-- 4 -->
+<section class="section" id="dev-steps">
+  <div class="section-head"><h2>04 · Building a Service, Step by Step — Order Service</h2><span class="badge d">developer</span></div>
+  <p class="lead">The same 12-layer shape applies to every service in the platform. Order Service below is the reference implementation the rest of the course refers back to.</p>
+  <div class="acc-group">
+    <div class="acc open"><div class="acc-h">1–2. Requirements &amp; API design</div><div class="acc-b">
+      <p><b>Requirement:</b> accept an order request, persist it, publish <code>OrderCreated</code>. <b>API:</b> <code>POST /api/v1/orders</code> → <code>201 Created</code> with the order resource and a <code>Location</code> header; <code>GET /api/v1/orders/{id}</code> → <code>200</code> or <code>404</code>.</p></div></div>
+    <div class="acc"><div class="acc-h">3–4. Package structure &amp; pom.xml</div><div class="acc-b">
+<div class="codewrap"><pre><code>order-service/
+ ├─ src/main/java/com/platform/order/
+ │   ├─ api/            <span class="tok-com">// controllers, request/response DTOs</span>
+ │   ├─ domain/          <span class="tok-com">// entities, value objects, domain services</span>
+ │   ├─ application/     <span class="tok-com">// use-case / application services</span>
+ │   ├─ infrastructure/  <span class="tok-com">// repositories, Kafka producers, outbox</span>
+ │   └─ config/
+ └─ src/test/java/…</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+<div class="codewrap"><pre><code>&lt;dependencies&gt;
+  &lt;dependency&gt;&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;&lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;&lt;artifactId&gt;spring-boot-starter-validation&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;&lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;&lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;com.oracle.database.jdbc&lt;/groupId&gt;&lt;artifactId&gt;ojdbc11&lt;/artifactId&gt;&lt;/dependency&gt;
+  &lt;dependency&gt;&lt;groupId&gt;io.github.resilience4j&lt;/groupId&gt;&lt;artifactId&gt;resilience4j-spring-boot3&lt;/artifactId&gt;&lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+    </div></div>
+    <div class="acc"><div class="acc-h">5–11. Entity, DTO, repository, service, controller, exceptions, validation</div><div class="acc-b">
+<div class="codewrap"><pre><code><span class="tok-ann">@Entity</span> <span class="tok-ann">@Table</span>(name = <span class="tok-str">"ORDERS"</span>)
+<span class="tok-kw">class</span> <span class="tok-typ">Order</span> {
+    <span class="tok-ann">@Id</span> <span class="tok-ann">@GeneratedValue</span> <span class="tok-typ">UUID</span> id;
+    <span class="tok-typ">String</span> customerId;
+    <span class="tok-ann">@Enumerated</span>(EnumType.STRING) <span class="tok-typ">OrderStatus</span> status;
+    <span class="tok-ann">@OneToMany</span>(cascade = CascadeType.ALL, orphanRemoval = <span class="tok-kw">true</span>)
+    <span class="tok-typ">List</span>&lt;OrderLine&gt; lines;
+    <span class="tok-typ">BigDecimal</span> totalAmount;
+    <span class="tok-typ">Instant</span> createdAt;
+}
+
+<span class="tok-com">// DTO as a Java 21 record — immutable, concise</span>
+<span class="tok-kw">record</span> <span class="tok-typ">CreateOrderRequest</span>(
+    <span class="tok-ann">@NotBlank</span> <span class="tok-typ">String</span> customerId,
+    <span class="tok-ann">@NotEmpty</span> <span class="tok-typ">List</span>&lt;OrderLineRequest&gt; lines) {}
+
+<span class="tok-ann">@Service</span>
+<span class="tok-kw">class</span> <span class="tok-typ">OrderApplicationService</span> {
+    <span class="tok-kw">private final</span> <span class="tok-typ">OrderRepository</span> orderRepository;
+    <span class="tok-kw">private final</span> <span class="tok-typ">OutboxRepository</span> outboxRepository; <span class="tok-com">// see Part 14 — Outbox</span>
+
+    <span class="tok-typ">OrderApplicationService</span>(OrderRepository orderRepository, OutboxRepository outboxRepository) {
+        <span class="tok-kw">this</span>.orderRepository = orderRepository; <span class="tok-kw">this</span>.outboxRepository = outboxRepository; <span class="tok-com">// constructor injection</span>
+    }
+
+    <span class="tok-ann">@Transactional</span>
+    <span class="tok-kw">public</span> <span class="tok-typ">Order</span> createOrder(CreateOrderRequest request) {
+        <span class="tok-typ">Order</span> order = Order.from(request);
+        orderRepository.save(order);
+        outboxRepository.save(OutboxEvent.of(<span class="tok-str">"Order"</span>, order.getId(), <span class="tok-str">"OrderCreated"</span>, order));
+        <span class="tok-kw">return</span> order;
+    }
+}
+
+<span class="tok-ann">@RestController</span> <span class="tok-ann">@RequestMapping</span>(<span class="tok-str">"/api/v1/orders"</span>)
+<span class="tok-kw">class</span> <span class="tok-typ">OrderController</span> {
+    <span class="tok-ann">@PostMapping</span>
+    <span class="tok-typ">ResponseEntity</span>&lt;OrderResponse&gt; create(<span class="tok-ann">@Valid</span> <span class="tok-ann">@RequestBody</span> CreateOrderRequest req) {
+        <span class="tok-typ">Order</span> order = orderApplicationService.createOrder(req);
+        <span class="tok-kw">return</span> ResponseEntity.created(URI.create(<span class="tok-str">"/api/v1/orders/"</span> + order.getId()))
+            .body(OrderResponse.from(order));
+    }
+
+    <span class="tok-ann">@ExceptionHandler</span>(OrderNotFoundException.<span class="tok-kw">class</span>)
+    <span class="tok-typ">ResponseEntity</span>&lt;ProblemDetail&gt; handleNotFound(OrderNotFoundException ex) {
+        <span class="tok-kw">return</span> ResponseEntity.status(404).body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+    </div></div>
+    <div class="acc"><div class="acc-h">14–20. Tests, Dockerfile, Compose, K8s, health checks, metrics</div><div class="acc-b">
+      <p>Unit tests isolate <code>OrderApplicationService</code> with mocked repositories; integration tests use <b>Testcontainers</b> to spin up a real Oracle container and a real Kafka broker so the outbox-publish path is verified end-to-end, not mocked away. See Parts 19 (Testing), 21 (Docker), 22 (Kubernetes) for the full implementations shared across every service in the platform.</p></div></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="section" id="springboot">
+  <div class="section-head"><h2>05 · Spring Boot Production Architecture</h2><span class="badge d">developer</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Auto-configuration &amp; DI</h4>Spring Boot inspects the classpath and configures beans conditionally (<code>@ConditionalOnClass</code>, etc). Constructor injection is preferred over field injection — it makes dependencies explicit, immutable, and trivially mockable in tests.</div>
+    <div class="card"><h4>Profiles &amp; externalized config</h4><code>application.yml</code> + <code>application-{profile}.yml</code>, overridden by environment variables in each deployment target — never hardcode environment-specific values, and never commit secrets to the config file itself.</div>
+    <div class="card"><h4>Actuator &amp; health endpoints</h4><code>/actuator/health</code> aggregates health indicators (DB, Kafka, disk space); split into <code>liveness</code> and <code>readiness</code> groups so Kubernetes probes each independently (see Part 22).</div>
+    <div class="card"><h4>Graceful shutdown</h4><code>server.shutdown=graceful</code> lets in-flight requests finish before the JVM exits — critical during rolling deployments so users don't see dropped connections mid-request.</div>
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-com"># application.yml — production-ready shape</span>
+server:
+  shutdown: graceful
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+</section>
+
+<!-- 6 -->
+<section class="section" id="rest">
+  <div class="section-head"><h2>06 · REST API Design</h2><span class="badge d">developer</span></div>
+  <table>
+    <tr><th>Principle</th><th>Good</th><th>Bad</th></tr>
+    <tr><td>Resource naming</td><td><code>GET /orders/{id}</code></td><td><code>GET /getOrder?id=</code></td></tr>
+    <tr><td>Method semantics</td><td><code>POST</code> creates, <code>PUT</code> replaces, <code>PATCH</code> partially updates, <code>DELETE</code> removes</td><td>Using <code>POST</code> for every operation</td></tr>
+    <tr><td>Status codes</td><td>201 on create, 404 on missing, 409 on conflict, 422 on semantic validation failure</td><td>200 for everything, including errors, with an error flag buried in the body</td></tr>
+    <tr><td>Idempotency</td><td><code>PUT</code> is naturally idempotent; for <code>POST</code>, accept an <code>Idempotency-Key</code> header for retry-safe creation</td><td>Assuming clients never retry a POST</td></tr>
+    <tr><td>Pagination</td><td><code>?page=2&amp;size=20</code> or cursor-based for large/real-time-changing collections</td><td>Returning the entire table on every call</td></tr>
+    <tr><td>Versioning</td><td>URI (<code>/v1/orders</code>) or header-based, chosen once and applied consistently</td><td>Breaking changes with no version signal</td></tr>
+    <tr><td>Error responses</td><td>RFC 7807 <code>ProblemDetail</code> — machine-readable type, title, status, detail</td><td>A raw stack trace or an inconsistent ad-hoc error shape per endpoint</td></tr>
+    <tr><td>Correlation ID</td><td>Accept/propagate <code>X-Correlation-Id</code> on every request, log it everywhere</td><td>No way to trace a request across services after the fact</td></tr>
+  </table>
+  <p><b>ETags &amp; conditional requests:</b> return an <code>ETag</code> on <code>GET</code>; require <code>If-Match</code> on <code>PUT</code>/<code>PATCH</code> to detect lost-update conflicts optimistically, without needing a database lock held across the request.</p>
+</section>
+
+<!-- 7 -->
+<section class="section" id="gateway">
+  <div class="section-head"><h2>07 · API Gateway</h2><span class="badge d">developer</span></div>
+  <div class="mermaid">
+sequenceDiagram
+  participant C as Client
+  participant G as API Gateway
+  participant A as Auth Server
+  participant O as Order Service
+  C->>G: POST /api/v1/orders (JWT)
+  G->>A: validate token (or local JWKS check)
+  A-->>G: valid, claims
+  G->>G: rate limit check, add Correlation-Id
+  G->>O: forward request
+  O-->>G: 201 Created
+  G-->>C: 201 Created
+  </div>
+  <p>An API Gateway (Spring Cloud Gateway) centralizes cross-cutting edge concerns so individual services don't each reimplement them: routing, authentication/token validation, coarse rate limiting, request/response transformation, CORS, SSL termination, and correlation-ID injection. It's a single well-known entry point — and, deliberately, a single circuit-breaking layer that can shed load before it reaches overloaded backend services.</p>
+  <div class="codewrap"><pre><code>spring:
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCB
+                fallbackUri: forward:/fallback/orders
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <div class="callout amber"><b>Architect note</b>Don't put business logic in the gateway. Its job is routing and cross-cutting policy enforcement — the moment it starts making business decisions, it becomes a hidden, hard-to-test extension of every downstream service, and a single point of coupling that undermines service independence.</div>
+</section>
+
+<!-- 8 -->
+<section class="section" id="communication">
+  <div class="section-head"><h2>08 · Service-to-Service Communication</h2><span class="badge d">developer</span></div>
+  <table>
+    <tr><th></th><th>REST / OpenFeign / WebClient</th><th>Kafka</th></tr>
+    <tr><td>Coupling</td><td>Synchronous, temporally coupled — callee must be up now</td><td>Asynchronous, temporally decoupled — callee can process later</td></tr>
+    <tr><td>Response</td><td>Immediate</td><td>Eventual</td></tr>
+    <tr><td>Failure mode</td><td>Caller blocks/fails if callee is down</td><td>Event waits durably in the log until a consumer is ready</td></tr>
+    <tr><td>Best for</td><td>Queries needing an answer now ("what's this order's status?")</td><td>Facts other services should react to ("this order was created")</td></tr>
+  </table>
+  <p><b>gRPC</b> is a synchronous option like REST but with a binary protocol (Protobuf) and generated strongly-typed stubs — lower latency and payload size than JSON/REST, at the cost of less human-readable debugging and less universal client tooling than REST.</p>
+  <div class="callout"><b>Architect decision rule</b>Choose synchronous when the caller genuinely cannot proceed without an answer right now (checking real-time inventory before confirming a purchase). Choose asynchronous when the caller just needs to announce a fact and doesn't need to wait (an order was placed — Payment, Inventory, and Notification all react independently, on their own schedule).</div>
+</section>
+
+<!-- 9 -->
+<section class="section" id="kafka">
+  <div class="section-head"><h2>09 · Kafka for Microservices</h2><span class="badge a">advanced</span></div>
+  <p class="lead">Full Kafka depth (internals, producer/consumer tuning, offsets, transactions) is its own masterclass — this section covers what an architect needs when Kafka is the integration backbone between services.</p>
+  <div class="mermaid">
+graph TD
+OC[OrderCreated event] --> K[(Kafka)]
+K --> PS[Payment Service]
+K --> IS[Inventory Service]
+K --> NS[Notification Service]
+  </div>
+  <table>
+    <tr><th>Concept</th><th>Architect-level takeaway</th></tr>
+    <tr><td>Partition &amp; key</td><td>Key every event by <code>orderId</code> (or the relevant aggregate id) — this is what keeps that aggregate's events in order and is a design decision made once, up front, not tuned later</td></tr>
+    <tr><td>Consumer group</td><td>One group per service, so each service's consumption is independent — Payment falling behind never blocks Inventory</td></tr>
+    <tr><td>Delivery semantics</td><td>Design every consumer as at-least-once + idempotent by default; treat "exactly-once" as an architecture you build (idempotent writes, Outbox), not a config flag you flip</td></tr>
+    <tr><td>Retention</td><td>Long enough that a redeployed or newly-added consumer can replay recent history — this replayability is one of Kafka's biggest advantages over REST-based integration</td></tr>
+    <tr><td>Schema evolution</td><td>Schema Registry with backward+forward compatible schemas so producer and consumer teams can deploy independently without a coordinated release</td></tr>
+    <tr><td>Dead Letter Topic</td><td>Every consumer needs one — an unprocessable "poison" event should never block the rest of the partition</td></tr>
+  </table>
+</section>
+
+<!-- 10 -->
+<section class="section" id="eda">
+  <div class="section-head"><h2>10 · Event-Driven Architecture</h2><span class="badge a">advanced</span></div>
+  <div class="grid3">
+    <div class="card"><h4>Event notification</h4>A thin event ("OrderCreated, id=123") tells subscribers something happened; they call back to fetch details if needed. Minimizes coupling to a shared payload shape, at the cost of an extra round-trip.</div>
+    <div class="card"><h4>Event-carried state transfer</h4>The event carries the full data subscribers need ("OrderCreated" with the whole order payload) — avoids the callback round-trip, at the cost of a larger, more tightly-coupled event contract.</div>
+    <div class="card"><h4>Event sourcing</h4>The sequence of events <i>is</i> the source of truth; current state is derived by replaying them. Powerful audit trail and time-travel debugging, but a real architectural commitment — most services in this platform use events as notifications, not as their system of record.</div>
+  </div>
+  <h3>Choreography vs Orchestration</h3>
+  <div class="mermaid">
+sequenceDiagram
+  participant O as Order Service
+  participant P as Payment Service
+  participant I as Inventory Service
+  Note over O,I: Choreography — no central coordinator
+  O->>P: OrderCreated (via Kafka)
+  P->>I: PaymentCompleted (via Kafka)
+  I->>O: InventoryReserved (via Kafka)
+  </div>
+  <table>
+    <tr><th></th><th>Choreography</th><th>Orchestration</th></tr>
+    <tr><td>Coordination</td><td>Implicit — each service reacts to events</td><td>Explicit — a saga orchestrator calls each step</td></tr>
+    <tr><td>Visibility</td><td>Flow is spread across services, harder to see end-to-end</td><td>Flow is in one place, easy to see and test</td></tr>
+    <tr><td>Coupling</td><td>Low — no service knows about the orchestrator</td><td>Services depend on being called by the orchestrator</td></tr>
+    <tr><td>Best for</td><td>Simple flows, few steps, high service autonomy</td><td>Complex, long-running flows with many compensations</td></tr>
+  </table>
+</section>
+
+<!-- 11 -->
+<section class="section" id="dbarch">
+  <div class="section-head"><h2>11 · Database Architecture</h2><span class="badge a">advanced</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Connection pooling — HikariCP</h4>Reuses DB connections instead of opening one per request. Undersized pools cause request queuing under load; oversized pools can overwhelm the database's own max-connections limit — size the pool against measured concurrency, not guesswork.</div>
+    <div class="card"><h4>Optimistic vs pessimistic locking</h4><b>Optimistic</b> (a <code>@Version</code> column) assumes conflicts are rare — cheap, fails fast on a real conflict, ideal for low-contention resources. <b>Pessimistic</b> (<code>SELECT … FOR UPDATE</code>) locks the row up front — safer under high contention, but reduces concurrency and risks deadlocks if lock order isn't consistent.</div>
+    <div class="card"><h4>The N+1 problem</h4>Lazy-loading a collection inside a loop fires one query per iteration instead of one batched query. Fix with a JPQL <code>JOIN FETCH</code>, an entity graph, or batch fetching — always verify with SQL logging, not assumption.</div>
+    <div class="card"><h4>Read replicas &amp; sharding</h4>Read replicas offload read-heavy traffic from the primary (with eventual-consistency lag to account for). Sharding splits data across multiple database instances by a shard key (e.g. customerId) when a single instance can't hold or serve the volume — a significant operational step, not a first move.</div>
+  </div>
+  <div class="callout amber"><b>Isolation levels &amp; deadlocks</b>Oracle defaults to READ COMMITTED. A deadlock occurs when two transactions lock resources in opposite order and each waits on the other — the database detects and kills one; the application must retry it. Always acquire locks (rows, tables) in a consistent order across the codebase to avoid this by design rather than by luck.</div>
+</section>
+
+<!-- 12 -->
+<section class="section" id="distxn">
+  <div class="section-head"><h2>12 · Distributed Transactions &amp; Saga</h2><span class="badge a">advanced</span></div>
+  <p>With Order DB, Payment DB, and Inventory DB all independently owned, no single ACID transaction can span all three. Two-Phase Commit (2PC) technically can, but requires a transaction coordinator, holds locks across all participants for the duration, and doesn't tolerate partition failure well — it's rarely used in modern cloud-native systems for exactly that reason.</p>
+  <h3>The Saga Pattern</h3>
+  <div class="mermaid">
+sequenceDiagram
+  participant O as Order Service
+  participant P as Payment Service
+  participant I as Inventory Service
+  O->>P: Charge payment
+  P-->>O: PaymentCompleted
+  O->>I: Reserve inventory
+  I-->>O: InventoryReservationFailed
+  O->>P: Compensate: Refund payment
+  P-->>O: Refunded
+  O->>O: Mark order Cancelled
+  </div>
+  <table>
+    <tr><th></th><th>Choreography Saga</th><th>Orchestration Saga</th></tr>
+    <tr><td>Who drives it</td><td>Each service, reacting to the previous event</td><td>A dedicated saga orchestrator service</td></tr>
+    <tr><td>Compensation</td><td>Each service publishes its own compensating event</td><td>Orchestrator explicitly calls compensating actions in reverse order</td></tr>
+    <tr><td>Complexity as steps grow</td><td>Gets hard to trace past ~4-5 steps</td><td>Stays visible and testable, but the orchestrator becomes critical infrastructure</td></tr>
+  </table>
+  <div class="callout"><b>2PC vs Saga</b>2PC gives strong consistency but sacrifices availability during the coordination window and doesn't scale well across many services. Saga gives up strong consistency for eventual consistency plus explicit compensation — the standard trade-off accepted in microservices, because availability and service independence usually matter more than immediate cross-service consistency.</div>
+</section>
+
+<!-- 13 -->
+<section class="section" id="outbox">
+  <div class="section-head"><h2>13 · The Outbox Pattern</h2><span class="badge a">advanced</span></div>
+  <div class="callout red"><b>The dual-write problem</b>"Save to Oracle" + "publish to Kafka" are two independent operations with no shared transaction. If the Oracle commit succeeds but the Kafka publish fails (broker down, network blip), the order exists with no event ever telling Payment/Inventory about it — a silent, hard-to-detect gap.</div>
+  <div class="mermaid">
+graph TD
+A[Application, one local transaction] --> B[ORDERS table]
+A --> C[OUTBOX_EVENTS table]
+C --> D[Outbox Publisher]
+D --> E[(Kafka)]
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-ann">@Entity</span> <span class="tok-ann">@Table</span>(name = <span class="tok-str">"OUTBOX_EVENTS"</span>)
+<span class="tok-kw">class</span> <span class="tok-typ">OutboxEvent</span> {
+    <span class="tok-ann">@Id</span> <span class="tok-typ">UUID</span> id;
+    <span class="tok-typ">String</span> aggregateType, aggregateId, eventType;
+    <span class="tok-ann">@Lob</span> <span class="tok-typ">String</span> payload;
+    <span class="tok-kw">boolean</span> published;
+}
+
+<span class="tok-ann">@Transactional</span> <span class="tok-com">// one local Oracle transaction — atomic by construction, no distributed transaction needed</span>
+<span class="tok-kw">public</span> <span class="tok-typ">Order</span> createOrder(CreateOrderRequest req) {
+    <span class="tok-typ">Order</span> order = orderRepository.save(Order.from(req));
+    outboxRepository.save(OutboxEvent.of(<span class="tok-str">"Order"</span>, order.getId(), <span class="tok-str">"OrderCreated"</span>, toJson(order)));
+    <span class="tok-kw">return</span> order; <span class="tok-com">// no Kafka call here at all</span>
+}
+
+<span class="tok-ann">@Scheduled</span>(fixedDelay = 500)
+<span class="tok-kw">void</span> publishOutbox() {
+    <span class="tok-kw">for</span> (<span class="tok-kw">var</span> e : outboxRepository.findByPublishedFalse()) {
+        kafkaTemplate.send(<span class="tok-str">"order-events"</span>, e.getAggregateId(), e.getPayload())
+            .whenComplete((r, ex) -&gt; { <span class="tok-kw">if</span> (ex == <span class="tok-kw">null</span>) markPublished(e); });
+    }
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <p>Because both writes happen in the same local Oracle transaction, they're atomic without any distributed transaction protocol. A CDC-based publisher (Debezium tailing the redo log) is an alternative to the polling publisher shown here — same guarantee, different mechanism, discussed further in the Kafka masterclass.</p>
+</section>
+
+<!-- 14 -->
+<section class="section" id="resilience">
+  <div class="section-head"><h2>14 · Resilience — Resilience4j</h2><span class="badge a">advanced</span></div>
+  <div class="mermaid">
+graph LR
+Client --> A[Service A] --> B[Service B — unavailable]
+A -.->|circuit opens, fallback used| Client
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Timeout</h4>Bounds how long a caller waits — without one, a slow dependency can hold threads/connections indefinitely and exhaust the caller's own resources.</div>
+    <div class="card"><h4>Retry + exponential backoff + jitter</h4>Retries transient failures; backoff avoids hammering a recovering dependency; jitter (randomized delay) prevents many clients from retrying in synchronized waves (the "thundering herd").</div>
+    <div class="card"><h4>Circuit breaker</h4>After enough failures, stops calling the failing dependency for a cooldown window and fails fast with a fallback instead — protects the caller and gives the dependency room to recover.</div>
+    <div class="card"><h4>Bulkhead</h4>Isolates resources (thread pools, connection pools) per dependency so one slow dependency can't exhaust threads needed to serve calls to a healthy one — named after ship compartments that contain flooding.</div>
+    <div class="card"><h4>Rate limiter</h4>Caps outbound or inbound call rate to protect a downstream dependency (or yourself) from being overwhelmed.</div>
+    <div class="card"><h4>Load shedding &amp; fallback</h4>Deliberately reject excess load (return 503 fast) rather than degrading everyone's latency, and provide a fallback (cached/default response) so a partial failure doesn't become a full outage.</div>
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-ann">@CircuitBreaker</span>(name = <span class="tok-str">"inventoryService"</span>, fallbackMethod = <span class="tok-str">"fallbackCheckStock"</span>)
+<span class="tok-ann">@Retry</span>(name = <span class="tok-str">"inventoryService"</span>)
+<span class="tok-ann">@Bulkhead</span>(name = <span class="tok-str">"inventoryService"</span>)
+<span class="tok-ann">@TimeLimiter</span>(name = <span class="tok-str">"inventoryService"</span>)
+<span class="tok-kw">public</span> <span class="tok-typ">CompletableFuture</span>&lt;StockLevel&gt; checkStock(String sku) {
+    <span class="tok-kw">return</span> CompletableFuture.supplyAsync(() -&gt; inventoryClient.getStock(sku));
+}
+
+<span class="tok-kw">public</span> <span class="tok-typ">CompletableFuture</span>&lt;StockLevel&gt; fallbackCheckStock(String sku, Throwable t) {
+    <span class="tok-kw">return</span> CompletableFuture.completedFuture(StockLevel.unknown(sku)); <span class="tok-com">// degrade, don't crash</span>
+}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <div class="callout red"><b>Never retry blindly</b>Retrying a non-idempotent write (e.g. "charge card") without an idempotency key turns a transient network blip into a duplicate charge. Retry is safe by default only for idempotent operations (GET, or writes protected by an idempotency key/unique constraint).</div>
+</section>
+
+<!-- 15 -->
+<section class="section" id="distproblems">
+  <div class="section-head"><h2>15 · Distributed Systems Problems</h2><span class="badge x">expert</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Partial failure</h4>In a distributed call, "no response" doesn't tell you whether the operation happened. Unlike an in-process call which either fully succeeds or throws, a network call can fail after the remote side already committed its effect — this ambiguity is the root of almost every distributed-systems design pattern in this course.</div>
+    <div class="card"><h4>Duplicate / lost / out-of-order messages</h4>A retried network call can duplicate an effect; a crash before an ack can lose a message from the caller's point of view even though it landed; parallel delivery paths can reorder related messages — hence idempotency, at-least-once design, and partition keys.</div>
+    <div class="card"><h4>Split brain</h4>A network partition can leave two nodes both believing they're the leader/primary, each accepting writes independently — resolved with consensus protocols (Raft) or fencing tokens, never by "just picking one and hoping."</div>
+    <div class="card"><h4>Clock skew</h4>Wall-clock timestamps across machines aren't reliably ordered — never use "latest timestamp wins" for conflict resolution across services without accounting for skew; prefer logical clocks (vector clocks, Kafka offsets) where order actually matters.</div>
+  </div>
+  <h3>CAP theorem &amp; PACELC</h3>
+  <div class="callout purple"><b>CAP</b>During a network Partition, you must choose between Consistency (every read sees the latest write, but may be unavailable) and Availability (always respond, but may serve stale data). You don't get to choose "both" during an actual partition — CAP only constrains behavior <i>during</i> a partition, which is why it's often over-applied to normal-operation trade-offs.<br><br><b>PACELC</b> extends this: even without a Partition (E = Else), you still trade Latency against Consistency in normal operation — a strongly-consistent read across regions is slower than an eventually-consistent local read. Most of this platform's data (Oracle per service) is CP within a service and eventually consistent across services via Kafka — a deliberate, stated trade-off, not an accident.</div>
+</section>
+
+<!-- 16 -->
+<section class="section" id="caching">
+  <div class="section-head"><h2>16 · Caching — Redis</h2><span class="badge a">advanced</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Cache-aside (lazy loading)</h4>App checks cache first; on a miss, reads the DB and populates the cache. Simple and the most common pattern — cache only holds what's actually been requested.</div>
+    <div class="card"><h4>Read-through / write-through</h4>The cache library itself loads on miss (read-through) or writes to the DB and cache together (write-through) — less app code, tighter coupling to the caching layer.</div>
+    <div class="card"><h4>Write-behind</h4>Writes go to the cache immediately and are asynchronously flushed to the DB — fastest writes, but risks data loss if the cache fails before the flush.</div>
+    <div class="card"><h4>TTL &amp; invalidation</h4>Set a TTL matched to how stale data can tolerably be; explicitly invalidate on write where staleness is unacceptable ("famous last words: cache invalidation is one of the two hard problems in computer science").</div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Cache stampede</h4>Many requests miss simultaneously (e.g. a popular key just expired) and all hit the DB at once. Mitigate with a short-lived lock around the recompute, or staggered/jittered TTLs.</div>
+    <div class="card"><h4>Cache penetration</h4>Repeated requests for a key that doesn't exist in the DB bypass the cache every time. Mitigate by caching the "not found" result too, with a short TTL.</div>
+    <div class="card"><h4>Cache avalanche</h4>Many keys expire at the same moment (all set with the same TTL at the same time), causing a synchronized DB load spike. Mitigate with randomized TTL jitter.</div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="section" id="security">
+  <div class="section-head"><h2>17 · Security — OAuth2, JWT &amp; Architect-Level Concerns</h2><span class="badge a">advanced</span></div>
+  <div class="mermaid">
+sequenceDiagram
+  participant C as Client
+  participant Auth as Authorization Server
+  participant G as API Gateway
+  participant S as Microservice
+  C->>Auth: Login (credentials)
+  Auth-->>C: Access token (JWT) + Refresh token
+  C->>G: Request + Bearer JWT
+  G->>G: Validate signature / expiry (JWKS)
+  G->>S: Forward request + claims
+  S-->>G: Response
+  G-->>C: Response
+  </div>
+  <table>
+    <tr><th>Concept</th><th>What it is</th></tr>
+    <tr><td>Authentication vs Authorization</td><td>Authentication answers "who are you?"; authorization answers "what are you allowed to do?" — a valid JWT proves the first, RBAC/ABAC claims decide the second</td></tr>
+    <tr><td>JWT vs session</td><td>JWT is self-contained and stateless — any service can validate it without a shared session store, at the cost of harder immediate revocation; sessions are easy to revoke instantly but need a shared store, adding a stateful dependency across services</td></tr>
+    <tr><td>RBAC vs ABAC</td><td>RBAC grants permissions by role ("ADMIN can refund"); ABAC evaluates attributes/context at request time ("this user can refund orders under $500 they personally handled") — more flexible, more complex to reason about</td></tr>
+    <tr><td>Service-to-service security / mTLS</td><td>Internal calls should also be authenticated — mTLS (mutual TLS) or a service mesh sidecar verifies both ends of an internal call, not just the edge</td></tr>
+    <tr><td>Secrets management</td><td>Never in config files or environment variables baked into images — use AWS Secrets Manager (or Kubernetes Secrets backed by an external provider) with rotation</td></tr>
+  </table>
+  <div class="callout red"><b>OWASP API Security — the essentials an architect must own</b>Broken object-level authorization (a user can access another user's order by guessing an ID — always authorize per-object, never trust the ID in the URL alone), SQL injection (parameterized queries always, never string-concatenated SQL), SSRF (never let user input directly control an outbound URL the server fetches), and excessive data exposure (DTOs should return only what the client needs, not the raw entity).</div>
+</section>
+
+<!-- 18 -->
+<section class="section" id="observability">
+  <div class="section-head"><h2>18 · Observability — Logs, Metrics, Traces</h2><span class="badge a">advanced</span></div>
+  <div class="mermaid">
+sequenceDiagram
+  participant G as Gateway
+  participant O as Order Service
+  participant P as Payment Service
+  participant K as Kafka
+  participant N as Notification Service
+  G->>O: traceId=abc123
+  O->>P: traceId=abc123 (propagated)
+  P->>K: publish, traceId=abc123 in header
+  K->>N: consume, traceId=abc123
+  Note over G,N: One traceId strings together every span into one view in Jaeger
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Logs</h4>Structured (JSON), always including a correlation/trace ID, service name, and level — searchable in aggregate, not just readable per-instance.</div>
+    <div class="card"><h4>Metrics</h4>Micrometer → Prometheus → Grafana. Track the four golden signals per service: latency, traffic, errors, saturation.</div>
+    <div class="card"><h4>Traces</h4>OpenTelemetry propagates a trace ID across every hop — HTTP, Kafka headers included — visualized in Jaeger to see exactly where latency accumulates across a multi-service request.</div>
+  </div>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>SLI (Indicator)</td><td>A measured metric, e.g. "99th percentile order-creation latency"</td></tr>
+    <tr><td>SLO (Objective)</td><td>The internal target for that SLI, e.g. "p99 &lt; 300ms, 99.9% of the time"</td></tr>
+    <tr><td>SLA (Agreement)</td><td>The external, often contractual commitment to a customer — usually looser than the internal SLO, leaving margin for error</td></tr>
+  </table>
+  <div class="callout"><b>Architect note</b>Observability is not optional infrastructure you add "later" — without correlation IDs and distributed tracing designed in from the start, a production incident across 6 services becomes a multi-hour log-grepping exercise instead of a five-minute trace lookup.</div>
+</section>
+
+<!-- 19 -->
+<section class="section" id="testing">
+  <div class="section-head"><h2>19 · Testing Microservices</h2><span class="badge d">developer</span></div>
+  <div class="mermaid">
+graph TD
+E2E["End-to-End (few)"] --> COMP["Component / Contract"]
+COMP --> INT["Integration (Testcontainers)"]
+INT --> UNIT["Unit (many)"]
+  </div>
+  <table>
+    <tr><th>Type</th><th>Purpose</th><th>Tooling</th></tr>
+    <tr><td>Unit</td><td>Isolated logic, mocked collaborators</td><td>JUnit 5, Mockito</td></tr>
+    <tr><td>Integration</td><td>Real DB/Kafka against the actual driver, in a disposable container</td><td>Testcontainers (Oracle XE, Kafka containers)</td></tr>
+    <tr><td>Contract</td><td>Verifies a producer's API/event shape matches what a consumer expects, without deploying both together</td><td>Pact, Spring Cloud Contract</td></tr>
+    <tr><td>Component</td><td>One service in isolation with its real dependencies mocked at the boundary</td><td>WireMock for downstream HTTP dependencies</td></tr>
+    <tr><td>End-to-end</td><td>The full flow through several real services — necessarily few, since they're slow and brittle</td><td>Deployed staging environment</td></tr>
+  </table>
+  <div class="callout green"><b>Testing pyramid discipline</b>Most tests should be fast unit tests; integration/contract tests validate the boundaries; end-to-end tests should be a small, curated set of critical user journeys — not the primary safety net. An inverted pyramid (mostly E2E) is slow to run and slow to debug when it fails.</div>
+</section>
+
+<!-- 20 -->
+<section class="section" id="performance">
+  <div class="section-head"><h2>20 · Performance Engineering</h2><span class="badge x">expert</span></div>
+  <div class="grid2">
+    <div class="card"><h4>JVM &amp; GC</h4>Size the heap to the workload, not a default; G1GC is the sane default for most services, ZGC/Shenandoah for very large heaps needing low pause times. Watch GC logs for frequent full GCs — usually an undersized heap or a memory leak, not a GC tuning problem.</div>
+    <div class="card"><h4>Thread pools &amp; connection pools</h4>Undersized pools cause queuing and timeouts under load; oversized pools cause context-switch overhead and can overwhelm a downstream dependency's own pool. Size against measured concurrency and downstream capacity together.</div>
+    <div class="card"><h4>Diagnosing a leak</h4>Take heap dumps under sustained load, compare object counts over time (VisualVM, JFR); a steadily-growing collection (an unbounded cache, an event listener never removed) is the most common culprit.</div>
+    <div class="card"><h4>Load &amp; stress testing</h4>JMeter/Gatling to find the throughput ceiling and the point where latency degrades non-linearly — capacity planning should target comfortably below that knee, not right at it.</div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="section" id="docker">
+  <div class="section-head"><h2>21 · Docker</h2><span class="badge d">developer</span></div>
+  <div class="codewrap"><pre><code><span class="tok-com"># Multi-stage build — small final image, no build tools shipped to production</span>
+<span class="tok-kw">FROM</span> eclipse-temurin:21-jdk <span class="tok-kw">AS</span> build
+<span class="tok-kw">WORKDIR</span> /app
+<span class="tok-kw">COPY</span> . .
+<span class="tok-kw">RUN</span> ./mvnw -q package -DskipTests
+
+<span class="tok-kw">FROM</span> eclipse-temurin:21-jre
+<span class="tok-kw">WORKDIR</span> /app
+<span class="tok-kw">COPY</span> --from=build /app/target/order-service.jar app.jar
+<span class="tok-kw">RUN</span> useradd -r appuser <span class="tok-kw">&&</span> chown appuser /app/app.jar
+<span class="tok-kw">USER</span> appuser
+<span class="tok-kw">EXPOSE</span> 8080
+<span class="tok-kw">ENTRYPOINT</span> [<span class="tok-str">"java"</span>, <span class="tok-str">"-jar"</span>, <span class="tok-str">"app.jar"</span>]</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <p>Multi-stage builds keep the JDK/Maven toolchain out of the final image (smaller attack surface, smaller image). Running as a non-root user, pinning base image versions, and scanning images in CI (SonarQube/registry scanning) round out a production-safe Dockerfile.</p>
+</section>
+
+<!-- 22 -->
+<section class="section" id="k8s">
+  <div class="section-head"><h2>22 · Kubernetes</h2><span class="badge a">advanced</span></div>
+  <table>
+    <tr><th>Object</th><th>Purpose</th></tr>
+    <tr><td>Pod</td><td>Smallest deployable unit — one or more tightly-coupled containers</td></tr>
+    <tr><td>Deployment / ReplicaSet</td><td>Declares desired replica count and rollout strategy; ReplicaSet keeps that count running</td></tr>
+    <tr><td>Service</td><td>Stable network identity/load-balancing in front of a changing set of pods</td></tr>
+    <tr><td>ConfigMap / Secret</td><td>Externalized config and sensitive values, injected as env vars or mounted files</td></tr>
+    <tr><td>Ingress</td><td>HTTP(S) routing into the cluster from outside</td></tr>
+    <tr><td>StatefulSet</td><td>For workloads needing stable identity/storage (databases, Kafka brokers) — not typical for stateless microservices</td></tr>
+    <tr><td>HPA</td><td>Horizontal Pod Autoscaler — scales replica count on CPU/memory/custom metrics</td></tr>
+  </table>
+  <div class="codewrap"><pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata: { name: order-service }
+spec:
+  replicas: 3
+  strategy: { type: RollingUpdate, rollingUpdate: { maxUnavailable: 0, maxSurge: 1 } }
+  template:
+    spec:
+      containers:
+        - name: order-service
+          image: registry/order-service:1.4.0
+          resources:
+            requests: { cpu: "250m", memory: "512Mi" }
+            limits:   { cpu: "1",    memory: "1Gi" }
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 8080 }, initialDelaySeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 8080 }, initialDelaySeconds: 30 }</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <table>
+    <tr><th></th><th>Liveness probe</th><th>Readiness probe</th></tr>
+    <tr><td>Question it answers</td><td>Is the process healthy, or should it be killed and restarted?</td><td>Is the pod ready to receive traffic right now?</td></tr>
+    <tr><td>Failure action</td><td>Kubernetes restarts the container</td><td>Kubernetes removes the pod from the Service's load-balancing rotation</td></tr>
+  </table>
+  <div class="grid3">
+    <div class="card"><h4>Rolling deployment</h4>Gradually replaces old pods with new ones — default, zero-downtime if probes are correct.</div>
+    <div class="card"><h4>Blue/green</h4>Full new environment stood up alongside the old; traffic is switched all at once — instant rollback, doubles resource cost during the switch.</div>
+    <div class="card"><h4>Canary</h4>A small percentage of traffic routed to the new version first, validated, then ramped up — lowest blast radius for a bad release.</div>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="section" id="k8sarch">
+  <div class="section-head"><h2>23 · Kubernetes Architecture</h2><span class="badge a">advanced</span></div>
+  <div class="mermaid">
+graph TD
+U[User] --> LB[Load Balancer] --> ING[Ingress] --> GW[API Gateway] --> SVC[Services] --> K[(Kafka)] --> DB[(Databases)]
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Control plane</h4><b>API Server</b> — the front door for all cluster operations. <b>etcd</b> — the cluster's distributed, consistent state store. <b>Scheduler</b> — decides which node a new pod runs on. <b>Controller Manager</b> — reconciliation loops that drive actual state toward desired state.</div>
+    <div class="card"><h4>Worker nodes</h4><b>Kubelet</b> — the agent that ensures containers described in pod specs are actually running on the node. <b>Container runtime</b> (containerd) — actually runs the containers. Together, the whole system is a continuous reconciliation loop: declare desired state, controllers work to make reality match it.</div>
+  </div>
+</section>
+
+<!-- 24 -->
+<section class="section" id="aws">
+  <div class="section-head"><h2>24 · AWS Cloud Architecture</h2><span class="badge a">advanced</span></div>
+  <div class="mermaid">
+graph TD
+I[Internet] --> R53[Route 53] --> CF[CloudFront] --> WAF --> ALB --> EKS[EKS]
+EKS --> MSK[(MSK — managed Kafka)]
+EKS --> RDS[(RDS Oracle)]
+EKS --> EC[(ElastiCache Redis)]
+EKS --> S3[(S3)]
+  </div>
+  <table>
+    <tr><th>Service</th><th>Role in this platform</th></tr>
+    <tr><td>VPC + public/private subnets</td><td>Network isolation — only the ALB sits in public subnets; EKS nodes, RDS, MSK stay private</td></tr>
+    <tr><td>Security groups</td><td>Stateful, instance-level firewalls — the primary internal access control between tiers</td></tr>
+    <tr><td>NAT Gateway</td><td>Lets private-subnet resources reach the internet outbound (patching, external APIs) without being reachable inbound</td></tr>
+    <tr><td>EKS</td><td>Managed Kubernetes control plane — AWS runs the control plane, you run the worker nodes and workloads</td></tr>
+    <tr><td>RDS (Oracle)</td><td>Managed database with automated backups, Multi-AZ failover, patching</td></tr>
+    <tr><td>MSK</td><td>Managed Kafka — AWS operates brokers/ZooKeeper-or-KRaft, you own topics/producers/consumers</td></tr>
+    <tr><td>ElastiCache</td><td>Managed Redis for caching/session/rate-limiting state</td></tr>
+    <tr><td>Secrets Manager</td><td>Rotated credentials/secrets injected into pods, never baked into images</td></tr>
+    <tr><td>IAM</td><td>Least-privilege roles per service (IRSA — IAM Roles for Service Accounts in EKS) instead of broad shared credentials</td></tr>
+    <tr><td>CloudWatch</td><td>Baseline metrics/logs/alarms, often paired with Prometheus/Grafana for richer application-level observability</td></tr>
+  </table>
+  <table>
+    <tr><th></th><th>ECS</th><th>EKS</th></tr>
+    <tr><td>Orchestration model</td><td>AWS-proprietary, simpler to operate</td><td>Standard Kubernetes — portable, larger ecosystem, steeper learning curve</td></tr>
+    <tr><td>Best for</td><td>Teams wanting AWS-native simplicity with less operational overhead</td><td>Teams wanting portability, existing Kubernetes expertise, or multi-cloud optionality</td></tr>
+  </table>
+</section>
+
+<!-- 25 -->
+<section class="section" id="cicd">
+  <div class="section-head"><h2>25 · CI/CD</h2><span class="badge d">developer</span></div>
+  <div class="mermaid">
+graph LR
+Dev[Developer] --> Git --> PR[Pull Request] --> Build --> UT[Unit Tests] --> SQ[SonarQube] --> IT[Integration Tests] --> Img[Docker Build] --> Reg[Container Registry] --> Deploy --> K8s
+  </div>
+  <div class="codewrap"><pre><code><span class="tok-com"># .github/workflows/ci.yml</span>
+name: order-service-ci
+on: { pull_request: { branches: [main] } }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+      - run: ./mvnw -q verify              <span class="tok-com"># unit + integration tests</span>
+      - uses: sonarsource/sonarqube-scan-action@v2
+      - run: docker build -t order-service:${{ github.sha }} .
+      - run: docker push registry/order-service:${{ github.sha }}</code></pre><button class="copybtn" onclick="copyCode(this)">copy</button></div>
+  <div class="callout"><b>Deployment strategy &amp; rollback</b>Merge to <code>main</code> triggers a canary rollout in Kubernetes; automated SLO checks (error rate, latency) gate promotion to 100%. A rollback is just redeploying the previous known-good image tag — this is why immutable, uniquely-tagged images (never <code>latest</code> in production) are non-negotiable.</div>
+</section>
+
+<!-- 26 -->
+<section class="section" id="patterns">
+  <div class="section-head"><h2>26 · Microservice Design Patterns</h2><span class="badge arc">architect</span></div>
+  <table>
+    <tr><th>Pattern</th><th>Problem it solves</th><th>When to use</th><th>When NOT to</th></tr>
+    <tr><td>API Gateway</td><td>Clients calling N services directly = N integrations to maintain</td><td>Any system with more than a couple of services and external clients</td><td>Internal-only, single-service systems</td></tr>
+    <tr><td>Service Discovery</td><td>Hardcoded service addresses break under elastic scaling</td><td>Dynamic environments (Kubernetes, auto-scaling)</td><td>Kubernetes DNS-based service discovery often makes a separate registry (Eureka) unnecessary</td></tr>
+    <tr><td>Circuit Breaker</td><td>A failing dependency's slowness cascades to its callers</td><td>Any synchronous call to a dependency that can fail or slow down</td><td>Rarely skip — but tune thresholds to the dependency's actual failure profile</td></tr>
+    <tr><td>Saga</td><td>No ACID transaction spans multiple services' databases</td><td>Multi-service business transactions (order → payment → inventory)</td><td>Simple flows better served by a single service owning the whole transaction</td></tr>
+    <tr><td>Outbox</td><td>Dual-write problem between DB and message broker</td><td>Any service that both writes to a DB and publishes an event for that write</td><td>Services with no DB write tied to the event</td></tr>
+    <tr><td>CQRS</td><td>Read and write models have very different scaling/shape needs</td><td>Read-heavy dashboards/reporting needing a different shape than the transactional write model</td><td>Simple CRUD services — the added complexity isn't justified</td></tr>
+    <tr><td>Event Sourcing</td><td>Need a full audit trail / time-travel / rebuildable state</td><td>Domains with strong audit or replay requirements (financial ledgers)</td><td>Most CRUD-shaped domains — significant complexity commitment</td></tr>
+    <tr><td>Strangler Fig</td><td>Rewriting a monolith all at once is high-risk</td><td>Incrementally migrating a legacy monolith by routing slices of traffic to new services over time</td><td>Greenfield systems with no legacy to strangle</td></tr>
+    <tr><td>Sidecar</td><td>Cross-cutting infra concerns (mTLS, logging, retries) duplicated in every service</td><td>Service mesh scenarios (Istio/Linkerd) needing consistent network policy across many services</td><td>Small deployments where the sidecar's resource overhead outweighs the benefit</td></tr>
+    <tr><td>Backend for Frontend (BFF)</td><td>One generic API awkwardly serves very different clients (mobile vs web)</td><td>Multiple client types with materially different data/shape needs</td><td>A single client type — a shared API is simpler</td></tr>
+    <tr><td>Anti-Corruption Layer</td><td>A legacy or external system's model would otherwise leak into your bounded context</td><td>Integrating with legacy systems or external vendors whose model doesn't match yours</td><td>Integrating with another well-designed internal service sharing your domain language</td></tr>
+    <tr><td>Aggregator</td><td>A client needs data assembled from several services in one call</td><td>A BFF or gateway-level endpoint composing several downstream calls</td><td>When each piece of data is independently useful to the client at different times</td></tr>
+  </table>
+</section>
+
+<!-- 27 -->
+<section class="section" id="antipatterns">
+  <div class="section-head"><h2>27 · Microservice Anti-Patterns</h2><span class="badge arc">architect</span></div>
+  <table>
+    <tr><th>Anti-pattern</th><th>How to spot it</th></tr>
+    <tr><td>Distributed monolith</td><td>Services can't be deployed independently because they're still tightly coupled — a "simple" change requires coordinated deploys across several services</td></tr>
+    <tr><td>Shared database</td><td>Two services' code both query the same tables directly, bypassing each other's APIs</td></tr>
+    <tr><td>Chatty services</td><td>Completing one user action requires a long synchronous chain of calls across many services, multiplying latency and failure surface</td></tr>
+    <tr><td>Nano-services</td><td>Services split so finely that the network-call overhead and operational cost dwarf the benefit of separation</td></tr>
+    <tr><td>Synchronous chain</td><td>A → B → C → D all synchronous — D's slowness or downtime takes A down with it, with no isolation</td></tr>
+    <tr><td>Shared business logic library</td><td>A "common" library that encodes business rules gets imported everywhere, becoming a hidden coupling point that forces coordinated releases</td></tr>
+    <tr><td>Ignoring observability</td><td>No correlation IDs, no tracing — incidents are debugged by grepping logs across a dozen services manually</td></tr>
+    <tr><td>No resilience patterns</td><td>A single slow dependency reliably takes down the whole request chain with no circuit breaker or fallback</td></tr>
+    <tr><td>Event spaghetti</td><td>So many implicit choreography event chains that no one can draw the actual end-to-end flow without archaeology</td></tr>
+  </table>
+</section>
+
+<!-- 28 -->
+<section class="section" id="sysdesign">
+  <div class="section-head"><h2>28 · System Design Exercises</h2><span class="badge arc">architect</span></div>
+  <div class="acc-group">
+    <div class="acc open"><div class="acc-h">1. E-commerce platform (the running example, generalized)</div><div class="acc-b">
+      <p><b>NFRs:</b> high read volume on product catalog, bursty write volume on checkout, strict payment consistency. <b>Approach:</b> database-per-service, Redis cache in front of the read-heavy Product Service, Kafka + Outbox for the order lifecycle, Saga for cross-service consistency, circuit breakers at every synchronous boundary.</p></div></div>
+    <div class="acc"><div class="acc-h">2. Banking transaction system</div><div class="acc-b">
+      <p><b>Key difference from e-commerce:</b> correctness trumps availability far more strongly — prefer strong consistency within the ledger service, use double-entry bookkeeping as the core data model, and treat every transaction as requiring idempotency keys end-to-end. Event sourcing is a strong fit here (regulatory audit trail is a first-class requirement, not an afterthought).</p></div></div>
+    <div class="acc"><div class="acc-h">3. Payment platform</div><div class="acc-b">
+      <p><b>Focus:</b> idempotency keys on every charge request, a state machine per payment (pending → authorized → captured → settled/failed) persisted explicitly rather than inferred, PCI-DSS scope minimization (tokenize card data at the edge, never store raw PANs), and reconciliation jobs against the payment processor's own records as a second line of defense.</p></div></div>
+    <div class="acc"><div class="acc-h">4. Food delivery system</div><div class="acc-b">
+      <p><b>Focus:</b> real-time location updates (high-frequency, latency-tolerant — a good fit for Kafka or a lighter pub/sub, not strict durability), geospatial matching of orders to drivers, and a saga spanning restaurant-accept → driver-assign → pickup → deliver with time-bound compensations (auto-cancel/reassign on timeout).</p></div></div>
+    <div class="acc"><div class="acc-h">5. Ride-sharing system</div><div class="acc-b">
+      <p><b>Focus:</b> similar geospatial matching to food delivery, plus surge pricing (a read-heavy, frequently-recomputed value best served from a fast cache, not computed per-request from raw data), and strong idempotency on trip state transitions since mobile clients retry aggressively on flaky networks.</p></div></div>
+    <div class="acc"><div class="acc-h">6. Notification platform</div><div class="acc-b">
+      <p><b>Focus:</b> a single Notification Service consuming events from every other service (order, payment, shipping) rather than each service independently integrating with email/SMS providers — this centralizes provider failover, rate limiting per channel, and user preference/opt-out enforcement in one place.</p></div></div>
+    <div class="acc"><div class="acc-h">7. Order management system</div><div class="acc-b">
+      <p>This is the platform built throughout the course — see Parts 3–13 for the full decomposition, Saga design, and Outbox implementation.</p></div></div>
+    <div class="acc"><div class="acc-h">8. File processing platform</div><div class="acc-b">
+      <p><b>Focus:</b> S3 as the durable store for raw files, an event (S3 event notification → Kafka, or SQS) triggering processing rather than polling, chunked/streaming processing for large files to bound memory use, and a dead-letter path for files that repeatedly fail processing so they don't block the pipeline.</p></div></div>
+  </div>
+  <div class="callout"><b>Answering any of these in an interview</b>Always work through: functional requirements → non-functional requirements (the numbers matter — get them stated explicitly) → capacity estimation → service decomposition → data model and ownership → sync vs async communication choices → failure handling → scaling → trade-offs, stated out loud. Interviewers are grading the reasoning path at least as much as the final diagram.</div>
+</section>
+
+<!-- 29 -->
+<section class="section" id="adr">
+  <div class="section-head"><h2>29 · Architect Decision Making &amp; ADRs</h2><span class="badge arc">architect</span></div>
+  <div class="callout purple"><b>The decision framework</b>For every architectural decision: What problem are we solving? What are the alternatives? Why this one? What are the trade-offs? What happens when it fails? How does it scale? How does it affect cost and operations? How hard is it to maintain? Writing the answers down — even briefly — is what separates a defensible architecture decision from a preference.</div>
+  <h3>Example ADR</h3>
+  <div class="card">
+    <h4>ADR-014: Use the Outbox Pattern for Order Service event publishing</h4>
+    <p><b>Status:</b> Accepted<br>
+    <b>Context:</b> Order Service must publish OrderCreated after committing the order to Oracle. A direct "save then publish" is vulnerable to the dual-write problem.<br>
+    <b>Decision:</b> Adopt the Outbox Pattern — write the order and an outbox event row in one local transaction; a scheduled publisher ships outbox rows to Kafka.<br>
+    <b>Alternatives considered:</b> 2PC (rejected — operational complexity, availability cost); CDC/Debezium (deferred — adds Kafka Connect infrastructure not yet justified at current scale); direct publish with manual reconciliation (rejected — reconciliation-as-primary-mechanism is fragile).<br>
+    <b>Trade-offs:</b> Slight publish latency (polling interval) versus guaranteed atomicity; an extra table and scheduled job to operate.<br>
+    <b>Revisit when:</b> If publish latency requirements tighten below the polling interval, or if we adopt CDC platform-wide for other reasons.</p>
+  </div>
+</section>
+
+<!-- 30 -->
+<section class="section" id="ha">
+  <div class="section-head"><h2>30 · High Availability</h2><span class="badge arc">architect</span></div>
+  <table>
+    <tr><th>Concept</th><th>Meaning</th></tr>
+    <tr><td>Redundancy</td><td>More than one instance of every critical component — no single point of failure</td></tr>
+    <tr><td>Multi-AZ</td><td>Redundant instances spread across availability zones within a region — survives a single AZ outage</td></tr>
+    <tr><td>Multi-region</td><td>Redundant deployments across regions — survives a full regional outage, at much higher cost/complexity</td></tr>
+    <tr><td>Active-active</td><td>All regions/instances serve live traffic simultaneously — best resource utilization, hardest to keep consistent</td></tr>
+    <tr><td>Active-passive</td><td>A standby region takes over only on failover — simpler consistency story, wastes standby capacity until needed</td></tr>
+    <tr><td>RPO</td><td>Recovery Point Objective — how much data loss is tolerable, driven by backup/replication frequency</td></tr>
+    <tr><td>RTO</td><td>Recovery Time Objective — how fast you must be back online after a failure</td></tr>
+  </table>
+  <div class="callout amber"><b>Architect note</b>Multi-region active-active sounds strictly better but multiplies data-consistency complexity (see CAP/PACELC in Part 15) and cost. Most systems should exhaust multi-AZ redundancy and well-tested backup/restore before reaching for multi-region — match the investment to the actual availability requirement stated in the SLA, not to what sounds most impressive in a design doc.</div>
+</section>
+
+<!-- 31 -->
+<section class="section" id="scalability">
+  <div class="section-head"><h2>31 · Scalability</h2><span class="badge arc">architect</span></div>
+  <table>
+    <tr><th></th><th>Vertical scaling</th><th>Horizontal scaling</th></tr>
+    <tr><td>Approach</td><td>Bigger instance (more CPU/RAM)</td><td>More instances behind a load balancer</td></tr>
+    <tr><td>Ceiling</td><td>Hard hardware limit</td><td>Effectively unlimited, if the service is stateless</td></tr>
+    <tr><td>Requires</td><td>Nothing special</td><td>Stateless services, externalized session/state</td></tr>
+  </table>
+  <p>Horizontal scaling is the default target for microservices — which is exactly why services should be stateless (no in-memory session state that only one instance holds) with any needed state pushed to Redis or the database. Scaling levers beyond compute: Kafka partition count for consumer parallelism, read replicas or sharding for database read/write scaling, and cache scaling (Redis cluster mode) for hot-key traffic.</p>
+  <div class="callout"><b>Identifying the actual bottleneck</b>Before scaling anything, use metrics (Part 18) to find where latency/saturation actually concentrates — scaling the wrong tier (adding app pods when the database connection pool is the real ceiling) wastes money and doesn't fix the symptom.</div>
+</section>
+
+<!-- 32 -->
+<section class="section" id="incidents">
+  <div class="section-head"><h2>32 · Production Incident Scenarios</h2><span class="badge x">expert</span></div>
+  <div class="acc-group">
+    <div class="acc open"><div class="acc-h">1. Kafka consumer lag suddenly increases</div><div class="acc-b"><p><b>Symptoms:</b> lag metric climbing. <b>Investigate:</b> is production volume actually up, or did consumer count/health drop (rebalances, crashes)? Is one specific partition/consumer disproportionately slow? Is a downstream dependency (Oracle) the real bottleneck? <b>Resolution:</b> fix the actual bottleneck rather than reflexively scaling consumers. <b>Prevention:</b> lag alerting well before user-visible impact, load testing that includes the consumer path.</p></div></div>
+    <div class="acc"><div class="acc-h">2. Database CPU reaches 100%</div><div class="acc-b"><p><b>Investigate:</b> slow query log for a new or regressed query, a missing index, connection pool storms, or a batch job overlapping peak traffic. <b>Resolution:</b> kill/optimize the offending query, add the missing index, or move the batch job off-peak. <b>Prevention:</b> query review in code review, index monitoring, staging load tests before large data migrations.</p></div></div>
+    <div class="acc"><div class="acc-h">3. API latency increases from 100ms to 5 seconds</div><div class="acc-b"><p><b>Investigate:</b> distributed trace to find which hop actually accumulated the latency — don't assume it's the service that's alerting. Check thread pool exhaustion, GC pauses, and a downstream dependency slowdown that circuit breakers should have contained but perhaps weren't configured for.</p></div></div>
+    <div class="acc"><div class="acc-h">4. Payment service is unavailable</div><div class="acc-b"><p><b>Immediate:</b> confirm circuit breakers in dependent services opened correctly (Order Service should degrade gracefully, not cascade-fail). <b>Resolution:</b> restore Payment Service; verify no orders were silently dropped rather than queued for retry via Kafka. <b>Prevention:</b> this is exactly why order acceptance and payment processing are decoupled via events rather than a synchronous blocking call.</p></div></div>
+    <div class="acc"><div class="acc-h">5. Duplicate orders are created</div><div class="acc-b"><p><b>Investigate:</b> client-side retry without an idempotency key, or a gateway-level retry policy retrying a POST that actually succeeded. <b>Fix:</b> require and enforce an <code>Idempotency-Key</code> header on order creation, with server-side dedup.</p></div></div>
+    <div class="acc"><div class="acc-h">6. Kafka messages are processed twice</div><div class="acc-b"><p><b>Cause:</b> normal at-least-once redelivery after a commit-after-processing crash, or a rebalance mid-processing. <b>Fix:</b> this is expected — verify the consumer is actually idempotent (unique constraint, dedup table) rather than treating the duplicate as a bug to "fix" at the Kafka layer.</p></div></div>
+    <div class="acc"><div class="acc-h">7. Redis goes down</div><div class="acc-b"><p><b>Impact:</b> depends entirely on whether services treat Redis as a cache (degrade to DB, slower but correct) or as a hard dependency (outage). <b>Prevention:</b> always design cache access with a fallback path to the source of truth, and alert on elevated DB load as an early signal of cache unavailability.</p></div></div>
+    <div class="acc"><div class="acc-h">8. Kubernetes pods continuously restart (CrashLoopBackOff)</div><div class="acc-b"><p><b>Investigate:</b> <code>kubectl describe pod</code> and logs from the previous container instance — commonly a failing liveness probe (too aggressive timeout), a missing config/secret, or an unhandled startup exception (bad DB connection string in a new deploy).</p></div></div>
+    <div class="acc"><div class="acc-h">9. Memory usage continuously increases</div><div class="acc-b"><p><b>Investigate:</b> heap dump comparison over time for a growing collection (unbounded cache, listener leak). <b>Short-term mitigation:</b> a scheduled restart buys time; <b>real fix</b> is identifying and bounding the leaking collection.</p></div></div>
+    <div class="acc"><div class="acc-h">10. One service causes cascading failure across the platform</div><div class="acc-b"><p><b>Root cause:</b> almost always a missing timeout/circuit breaker/bulkhead somewhere in the synchronous call chain, letting one slow dependency exhaust threads in every caller up the chain. <b>Fix:</b> audit every synchronous call for timeout + circuit breaker + bulkhead; consider whether that call should have been asynchronous (Kafka) in the first place.</p></div></div>
+  </div>
+</section>
+
+<!-- 33/34 -->
+<section class="section" id="interview">
+  <div class="section-head"><h2>33 · Architect Interview Question Bank</h2><span class="badge arc">all levels</span></div>
+  <p class="lead">Organized by difficulty across Java/Spring, microservices, Kafka, distributed systems, database, security, Kubernetes, AWS, and system design. Click to expand — short answer first, then the reasoning a senior/architect interviewer is actually listening for.</p>
+  <div class="filterbar" id="qfilters">
+    <button class="filterbtn active" data-f="all">All</button>
+    <button class="filterbtn" data-f="beg">🟢 Beginner</button>
+    <button class="filterbtn" data-f="int">🔵 Intermediate</button>
+    <button class="filterbtn" data-f="adv">🟠 Advanced</button>
+    <button class="filterbtn" data-f="exp">🔴 Expert</button>
+    <button class="filterbtn" data-f="arc">🟣 Architect</button>
+  </div>
+  <div id="qabank"></div>
+</section>
+
+<section class="section" id="scenario-interview">
+  <div class="section-head"><h2>34 · Scenario-Based Interview Questions</h2><span class="badge x">expert</span></div>
+  <div class="acc-group">
+    <div class="acc"><div class="acc-h">"You have 20 microservices and one is causing cascading failures. What do you do?"</div><div class="acc-b"><p>Immediate: identify the failing service via tracing/metrics, confirm whether circuit breakers isolated it (if not, that's the real root cause, not the failing service itself). Contain: manually trip circuit breakers or scale down traffic to the failing service if automation didn't. Long-term: audit every synchronous caller of that service for timeout/circuit-breaker/bulkhead coverage, and evaluate whether that dependency should be asynchronous instead.</p></div></div>
+    <div class="acc"><div class="acc-h">"Kafka has millions of messages and consumer lag keeps increasing. How do you troubleshoot?"</div><div class="acc-b"><p>Separate "more volume than usual" from "less consumption capacity than usual" first — check production rate and consumer group health/count. Then check if the bottleneck is partition-bound (add consumers up to partition count) or dependency-bound (a slow downstream call, usually the actual answer). Only increase partition count as a last resort, since it's a heavier, harder-to-reverse change.</p></div></div>
+    <div class="acc"><div class="acc-h">"Two services need to update different databases atomically. How do you solve this?"</div><div class="acc-b"><p>You generally don't get true atomicity across two independently-owned databases without 2PC (rarely worth its cost). Use a Saga instead — accept eventual consistency, design explicit compensating actions, and make every step idempotent so retries are safe.</p></div></div>
+    <div class="acc"><div class="acc-h">"The business requires exactly-once processing. What does that actually mean?"</div><div class="acc-b"><p>Push back gently: "exactly-once" as commonly meant is really "effectively-once" — at-least-once delivery plus idempotent processing, so duplicates are harmless even though they can occur. True exactly-once within Kafka-to-Kafka pipelines is achievable via transactions; extending it to an external database needs Outbox/CDC plus idempotent writes, not a flag you flip.</p></div></div>
+    <div class="acc"><div class="acc-h">"Your API receives 50,000 requests/sec. How would you design it?"</div><div class="acc-b"><p>Stateless horizontally-scaled service instances behind a load balancer, aggressive caching for read-heavy paths, async processing (Kafka) for anything that doesn't need an immediate synchronous answer, rate limiting/load shedding at the edge to protect against overload, and capacity-planned database connections/read replicas sized to the sustained (not just average) rate.</p></div></div>
+    <div class="acc"><div class="acc-h">"The database can't handle increasing traffic. What are your options?"</div><div class="acc-b"><p>In rough order of operational cost: add a cache in front of hot reads; add read replicas for read-heavy load; optimize the worst queries/indexes (often the actual fix); scale the instance vertically as a stopgap; only then consider sharding — a significant architectural commitment reserved for when the above genuinely aren't enough.</p></div></div>
+    <div class="acc"><div class="acc-h">"How would you migrate a monolith to microservices?"</div><div class="acc-b"><p>Strangler Fig, not a rewrite: identify a bounded context with clear boundaries and lower risk, extract it behind the existing API surface (clients don't notice), give it its own database, route an increasing share of traffic to it, and repeat — validating each extraction in production before moving to the next, rather than attempting a big-bang cutover.</p></div></div>
+    <div class="acc"><div class="acc-h">"How would you design a payment system?"</div><div class="acc-b"><p>See Part 28, Exercise 3 — lead with idempotency keys on every charge, an explicit persisted state machine per payment, PCI scope minimization via tokenization, and reconciliation against the payment processor's records as a second line of defense beyond your own event log.</p></div></div>
+  </div>
+</section>
+
+<!-- 35 -->
+<section class="section" id="evolution">
+  <div class="section-head"><h2>35 · Architecture Evolution</h2><span class="badge arc">architect</span></div>
+  <div class="mermaid">
+graph TD
+P1[Phase 1: Monolith] --> P2[Phase 2: Modular Monolith]
+P2 --> P3[Phase 3: Microservices]
+P3 --> P4[Phase 4: Event-Driven]
+P4 --> P5[Phase 5: Cloud-Native]
+P5 --> P6[Phase 6: Highly Available Distributed Platform]
+  </div>
+  <p>Each phase is a response to a real, felt pain point — not adopted for its own sake. Monolith → Modular Monolith happens when a growing team starts stepping on each other inside one codebase. Modular Monolith → Microservices happens when independent deployment and scaling genuinely start mattering more than the simplicity being given up. Microservices → Event-Driven happens when synchronous chains start creating too much temporal coupling and cascading failure risk. Event-Driven → Cloud-Native happens when manual infrastructure operation becomes the bottleneck to shipping. Cloud-Native → Highly Available Distributed Platform happens when the business's actual availability/scale requirements demand multi-AZ/region investment. Skipping straight to the end state without the felt pain that justifies each step is how organizations end up over-engineering for a problem they don't have yet.</p>
+</section>
+
+<!-- 36 -->
+<section class="section" id="reference">
+  <div class="section-head"><h2>36 · Complete Reference Architecture</h2><span class="badge arc">architect</span></div>
+  <div class="mermaid">
+graph TD
+INTERNET((Internet)) --> R53[Route 53]
+R53 --> WAF
+WAF --> ALB[Load Balancer]
+ALB --> GW[API Gateway]
+GW --> CUST[Customer Service]
+GW --> ORD[Order Service]
+GW --> PROD[Product Service]
+CUST --> CDB[(Customer DB)]
+ORD --> ODB[(Order DB)]
+PROD --> PDB[(Product DB)]
+ORD --> KAFKA[(Kafka)]
+KAFKA --> PAY[Payment Service]
+KAFKA --> INV[Inventory Service]
+KAFKA --> NOTIF[Notification Service]
+PAY --> PAYDB[(Payment DB)]
+INV --> INVDB[(Inventory DB)]
+NOTIF --> PROVIDER[Email/SMS Provider]
+ORD --> REDIS[(Redis)]
+CUST --> OBS[Observability: Prometheus + Grafana + OpenTelemetry]
+ORD --> OBS
+PAY --> OBS
+INV --> OBS
+  </div>
+  <p>Every box in this diagram was justified individually in an earlier part: WAF and the Gateway for edge security and routing (Parts 7, 17); database-per-service for independent ownership (Part 2); Kafka plus Outbox for reliable async integration (Parts 9, 13); Redis for read-heavy caching (Part 16); and the observability stack because none of the rest is debuggable in production without it (Part 18). A reference architecture is only as strong as the reasoning behind each component — be ready to defend every box, not just draw it.</p>
+</section>
+
+<!-- 37 -->
+<section class="section" id="checklist">
+  <div class="section-head"><h2>37 · Architect Checklist</h2><span class="badge arc">architect</span></div>
+  <div class="grid2">
+    <div class="card"><h4>Design</h4><ul class="checklist">
+      <li>Service boundaries match bounded contexts, not org charts alone</li>
+      <li>Each service owns its data exclusively — no cross-service table access</li>
+      <li>API contracts versioned and backward compatible</li>
+      <li>Sync vs async communication chosen deliberately per interaction</li>
+    </ul></div>
+    <div class="card"><h4>Reliability</h4><ul class="checklist">
+      <li>Every synchronous call has a timeout</li>
+      <li>Retries are idempotency-safe, with backoff and jitter</li>
+      <li>Circuit breakers on every external/downstream dependency</li>
+      <li>Bulkheads isolate resource pools per dependency</li>
+      <li>Every write path is idempotent</li>
+    </ul></div>
+    <div class="card"><h4>Security</h4><ul class="checklist">
+      <li>Authentication at the edge, authorization checked per-object</li>
+      <li>Secrets in a managed secret store, never in images or env files</li>
+      <li>TLS everywhere, including service-to-service</li>
+      <li>Input validated, output scoped to least data necessary</li>
+    </ul></div>
+    <div class="card"><h4>Observability</h4><ul class="checklist">
+      <li>Structured logs with correlation/trace IDs everywhere</li>
+      <li>Golden-signal metrics per service (latency, traffic, errors, saturation)</li>
+      <li>Distributed tracing across every hop, including Kafka</li>
+      <li>SLOs defined and alerted on before customers notice</li>
+    </ul></div>
+    <div class="card"><h4>Deployment</h4><ul class="checklist">
+      <li>Multi-stage, non-root Docker images, pinned versions</li>
+      <li>Liveness and readiness probes correctly separated</li>
+      <li>CI enforces tests + quality gate + security scan before merge</li>
+      <li>Rollback is a redeploy of a known-good immutable image tag</li>
+      <li>Disaster recovery tested, not just documented</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 38 -->
+<section class="section" id="revision">
+  <div class="section-head"><h2>38 · Quick Revision, Mental Models, Flashcards &amp; Quiz</h2><span class="badge arc">all levels</span></div>
+  <div class="tabs" id="revtabs">
+    <div class="tab active" data-t="rms">Microservices in 10 min</div>
+    <div class="tab" data-t="rkf">Kafka in 10 min</div>
+    <div class="tab" data-t="rds">Distributed systems in 10 min</div>
+    <div class="tab" data-t="rk8">Kubernetes in 10 min</div>
+    <div class="tab" data-t="rsd">System design in 10 min</div>
+    <div class="tab" data-t="rmm">Architect mental models</div>
+  </div>
+  <div class="tabpanel active" id="rms"><p>A monolith becomes microservices when independent deployment/scaling matters more than simplicity. Each service owns its own database — no exceptions. Communicate synchronously (REST) only when you genuinely need an answer now; otherwise publish events (Kafka) and let subscribers react independently. The dual-write problem (DB write + event publish aren't atomic) is solved with Outbox or CDC. Cross-service transactions use Saga with compensations, not 2PC. Every synchronous call needs a timeout, retry-with-backoff, circuit breaker, and bulkhead — without them, one slow dependency cascades into a platform-wide outage.</p></div>
+  <div class="tabpanel" id="rkf"><p>A topic is split into partitions for parallelism; order is guaranteed only within a partition, so key events by aggregate ID. Delivery is at-least-once by default — build idempotent consumers rather than fighting it. acks=all + min.insync.replicas gives durability at a latency cost, justified for financial events. Kafka transactions guarantee exactly-once within Kafka only, not across an external database.</p></div>
+  <div class="tabpanel" id="rds"><p>Every distributed call can fail partially — "no response" doesn't mean "didn't happen." Design for duplicate, lost, and out-of-order messages as the normal case, not the edge case. CAP says you trade consistency for availability during a partition; PACELC says you keep trading latency for consistency even without one. Prefer eventual consistency across service boundaries and strong consistency only within a single service's own database.</p></div>
+  <div class="tabpanel" id="rk8"><p>A Pod is the smallest deployable unit; a Deployment keeps a desired replica count running via rolling updates. Liveness probes answer "restart me or not"; readiness probes answer "send me traffic or not" — conflating them causes bad rollouts. HPA scales replica count on load. The control plane (API server, etcd, scheduler, controller manager) continuously reconciles actual state toward desired state — that reconciliation loop is the core mental model for everything Kubernetes does.</p></div>
+  <div class="tabpanel" id="rsd"><p>Always work the same order: functional requirements → non-functional requirements with real numbers → capacity estimation → service decomposition and data ownership → sync vs async choices → failure handling → scaling → explicit trade-offs. Interviewers grade the reasoning path, not just the final diagram — narrate your decisions, don't just draw boxes.</p></div>
+  <div class="tabpanel" id="rmm"><div class="callout"><b>Rules worth memorizing</b>
+    <p>Every service owns its data.<br>Sync when you need an immediate answer. Async when you need decoupling.<br>Timeout before retry. Retry with backoff and jitter. Never retry blindly.<br>Every distributed call can fail. Every message can arrive twice — design for idempotency.<br>Observability is not optional.<br>Scale horizontally whenever the service is stateless.<br>Prefer simple architecture before clever architecture — earn complexity with a felt problem, don't pre-adopt it.</p></div></div>
+
+  <h3 style="margin-top:30px;">Flashcards</h3>
+  <div id="flashwrap">
+    <div id="flashcard" class="flashcard"><div class="face-a"></div><div class="face-b"></div></div>
+    <div class="flashctrl">
+      <button class="hbtn" onclick="flashPrev()">← prev</button>
+      <button class="hbtn" onclick="flashRandom()">🔀 random</button>
+      <button class="hbtn" onclick="flashNext()">next →</button>
+    </div>
+  </div>
+
+  <h3>Quiz</h3>
+  <div id="quizbox">
+    <div id="quizmeta"></div>
+    <div id="quizq"></div>
+    <div id="quizopts"></div>
+  </div>
+</section>
+
+<footer>JAVA MICROSERVICES ARCHITECT MASTERCLASS · single-file, no backend, offline-capable · open index.html to run</footer>
+</main>
+</div>
+
+<button id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* ---------------- NAV DATA ---------------- */
+const NAV = [
+ {g:"Foundations", items:[
+   ["fundamentals","01 Fundamentals"],["designing","02 Designing / DDD"],["project","03 The Project"]]},
+ {g:"Building It", items:[
+   ["dev-steps","04 Building a Service"],["springboot","05 Spring Boot Arch"],["rest","06 REST API Design"],
+   ["gateway","07 API Gateway"],["communication","08 Communication"]]},
+ {g:"Event-Driven & Data", items:[
+   ["kafka","09 Kafka"],["eda","10 Event-Driven Arch"],["dbarch","11 Database Arch"],
+   ["distxn","12 Distributed Transactions"],["outbox","13 Outbox Pattern"]]},
+ {g:"Production Engineering", items:[
+   ["resilience","14 Resilience"],["distproblems","15 Distributed Problems"],["caching","16 Caching"],
+   ["security","17 Security"],["observability","18 Observability"],["testing","19 Testing"],["performance","20 Performance"]]},
+ {g:"Infra & Cloud", items:[
+   ["docker","21 Docker"],["k8s","22 Kubernetes"],["k8sarch","23 K8s Architecture"],
+   ["aws","24 AWS Architecture"],["cicd","25 CI/CD"]]},
+ {g:"Architecture", items:[
+   ["patterns","26 Design Patterns"],["antipatterns","27 Anti-Patterns"],["sysdesign","28 System Design"],
+   ["adr","29 ADRs & Decisions"],["ha","30 High Availability"],["scalability","31 Scalability"],["incidents","32 Incidents"]]},
+ {g:"Interview Prep", items:[
+   ["interview","33 Interview Bank"],["scenario-interview","34 Scenario Questions"],["evolution","35 Evolution"],
+   ["reference","36 Reference Architecture"],["checklist","37 Checklist"],["revision","38 Revision & Roadmap"]]}
+];
+let flatIds=[];
+const sidebar=document.getElementById('sidebar');
+NAV.forEach(group=>{
+  const lbl=document.createElement('div'); lbl.className='navgroup-label'; lbl.textContent=group.g;
+  sidebar.appendChild(lbl);
+  group.items.forEach(([id,label])=>{
+    flatIds.push(id);
+    const div=document.createElement('div'); div.className='navitem'; div.dataset.id=id;
+    div.innerHTML=`<span class="off">${String(flatIds.length).padStart(2,'0')}</span><span>${label.replace(/^\d+\s/,'')}</span>`;
+    div.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+    sidebar.appendChild(div);
+  });
+});
+document.getElementById('partMax').textContent=flatIds.length;
+
+/* ---------------- SCROLL: progress + active nav ---------------- */
+const sections=flatIds.map(id=>document.getElementById(id));
+function onScroll(){
+  const doc=document.documentElement;
+  const pct=(doc.scrollTop)/((doc.scrollHeight-doc.clientHeight)||1)*100;
+  document.getElementById('fill').style.width=pct+'%';
+  document.getElementById('toTop').style.display = doc.scrollTop>600 ? 'block':'none';
+  let activeIdx=0;
+  sections.forEach((s,i)=>{ if(s && s.getBoundingClientRect().top < 140) activeIdx=i; });
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.remove('active'));
+  const active=document.querySelectorAll('.navitem')[activeIdx];
+  if(active){active.classList.add('active'); active.scrollIntoView({block:'nearest'});}
+  document.getElementById('partNow').textContent=String(activeIdx+1).padStart(2,'0');
+}
+document.addEventListener('scroll',onScroll); onScroll();
+
+/* ---------------- theme ---------------- */
+document.getElementById('themeBtn').onclick=()=>{
+  document.body.classList.toggle('light');
+  document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? '☀ theme' : '☾ theme';
+  mermaid.initialize({ startOnLoad:false, theme: document.body.classList.contains('light') ? 'default' : 'dark' });
+  document.querySelectorAll('.mermaid').forEach(el=>{ if(el.dataset.src){ el.removeAttribute('data-processed'); el.innerHTML=el.dataset.src; } });
+  mermaid.run();
+};
+
+/* ---------------- mermaid init ---------------- */
+document.querySelectorAll('.mermaid').forEach(el=>{ el.dataset.src=el.innerHTML; });
+mermaid.initialize({ startOnLoad:true, theme:'dark', securityLevel:'loose', fontFamily:'IBM Plex Mono, monospace' });
+
+/* ---------------- accordion ---------------- */
+document.addEventListener('click',e=>{
+  const h=e.target.closest('.acc-h');
+  if(h){ h.parentElement.classList.toggle('open'); }
+});
+
+/* ---------------- copy code ---------------- */
+function copyCode(btn){
+  const code=btn.previousElementSibling.innerText;
+  navigator.clipboard.writeText(code).then(()=>{ const t=btn.textContent; btn.textContent='copied'; setTimeout(()=>btn.textContent=t,1200); });
+}
+
+/* ---------------- tabs (revision) ---------------- */
+document.querySelectorAll('#revtabs .tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('#revtabs .tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.t).classList.add('active');
+  };
+});
+
+/* ---------------- search ---------------- */
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.section').forEach(sec=>{
+    if(!q){ sec.classList.remove('hidden-by-search'); return; }
+    const match=sec.innerText.toLowerCase().includes(q);
+    sec.classList.toggle('hidden-by-search',!match);
+  });
+});
+
+/* ================= INTERVIEW Q&A BANK ================= */
+const QA=[
+ {l:'beg',q:'What is a microservice?',a:'An independently deployable service built around a specific business capability, owning its own data, that communicates with other services over the network rather than in-process method calls.'},
+ {l:'beg',q:'Monolith vs microservices — what changes?',a:'Deployment (one unit vs many independent ones), scaling (whole app vs per-service), data ownership (shared schema vs database-per-service), and organizational structure (one team vs many autonomous teams), at the cost of new distributed-systems complexity.'},
+ {l:'beg',q:'What is database-per-service and why does it matter?',a:'Each service owns its schema exclusively; no other service queries it directly. It is what actually makes services independent — if two services still JOIN across each other\'s tables, they are not truly decoupled regardless of how the code is split.'},
+ {l:'beg',q:'What is an API Gateway for?',a:'A single edge entry point handling routing, authentication, rate limiting, and cross-cutting concerns so individual services don\'t each reimplement them, and so clients don\'t need to know about every service\'s address.'},
+ {l:'beg',q:'REST vs Kafka — when do you choose each?',a:'REST when the caller needs an immediate answer and can tolerate temporal coupling to the callee\'s availability. Kafka when the caller just needs to announce a fact and doesn\'t need to wait for or even know who is listening.'},
+ {l:'beg',q:'What is idempotency and why does it matter in microservices?',a:'An operation that produces the same result no matter how many times it\'s applied. It matters because network calls and message delivery are not exactly-once by default — retries and redelivery are normal, and idempotent operations make those retries safe.'},
+ {l:'int',q:'What is the dual-write problem?',a:'When a service both writes to its database and publishes an event for that write as two separate operations with no shared transaction — if one succeeds and the other fails, the database and the event stream disagree about what happened.'},
+ {l:'int',q:'Explain the Outbox Pattern.',a:'Write the business row and an outbox event row in one local database transaction, then have a separate publisher reliably ship outbox rows to the message broker — atomicity comes from the local transaction, solving the dual-write problem without a distributed transaction.'},
+ {l:'int',q:'What is the Saga pattern and when do you use it?',a:'A sequence of local transactions across services, each with a defined compensating action, used to achieve business-level consistency across services that each own their own database — used whenever a business transaction spans more than one service\'s data.'},
+ {l:'int',q:'Choreography vs orchestration sagas?',a:'Choreography has each service reacting to the previous event with no central coordinator — simple and decoupled but hard to trace past a few steps. Orchestration has a dedicated coordinator explicitly calling each step and compensation — visible and testable, at the cost of a new central component.'},
+ {l:'int',q:'What does a circuit breaker do?',a:'After a failure threshold, it stops calling a failing dependency for a cooldown period and fails fast with a fallback instead of letting every caller queue up waiting on a dependency that isn\'t going to respond — protecting the caller\'s own resources and giving the dependency room to recover.'},
+ {l:'int',q:'What is a bulkhead and why is it named that?',a:'Isolating resource pools (threads, connections) per dependency so a slow one can\'t exhaust resources needed to call a healthy one — named after a ship\'s watertight compartments that contain flooding to one section.'},
+ {l:'int',q:'Liveness probe vs readiness probe?',a:'Liveness answers "is this process healthy, or should Kubernetes restart it?" Readiness answers "is this pod ready to receive traffic right now?" Conflating them causes bad rollouts — e.g. restarting a pod that\'s just temporarily busy, not actually broken.'},
+ {l:'int',q:'What is the N+1 query problem?',a:'Lazily loading a collection inside a loop fires one query per iteration instead of one batched query — fixed with a JOIN FETCH, entity graph, or batch fetch size, and always verified with actual SQL logging.'},
+ {l:'adv',q:'2PC vs Saga — what\'s the real trade-off?',a:'2PC gives strong cross-service consistency but holds locks across all participants for the duration and doesn\'t tolerate partition failure well, hurting availability. Saga gives up immediate consistency for eventual consistency plus explicit compensation, which is why it\'s the standard choice in microservices where availability and service independence usually matter more.'},
+ {l:'adv',q:'What does "exactly-once" actually mean in practice?',a:'True exactly-once end-to-end (including an external database) isn\'t free — it\'s built from at-least-once delivery plus idempotent processing, so duplicates are harmless even when they occur. Kafka transactions provide real exactly-once only within Kafka-to-Kafka pipelines.'},
+ {l:'adv',q:'CAP theorem — what does it actually constrain?',a:'During an actual network partition, a system must choose between consistency (reject/delay some requests to stay correct) and availability (respond anyway, possibly with stale data). It says nothing prescriptive about normal operation without a partition — that\'s what PACELC\'s latency-vs-consistency trade-off covers instead.'},
+ {l:'adv',q:'How do you prevent cascading failure across services?',a:'Timeouts on every synchronous call, retries with backoff/jitter only on idempotent operations, circuit breakers to fail fast once a dependency is clearly unhealthy, and bulkheads so one dependency\'s slowness can\'t exhaust resources needed for calls to healthy dependencies.'},
+ {l:'adv',q:'How do you achieve service-to-service security beyond the API Gateway?',a:'mTLS or a service mesh sidecar authenticates both ends of internal calls — the Gateway secures the edge, but internal traffic inside the cluster still needs to verify caller identity, since a compromised pod shouldn\'t get a free pass to call anything internally.'},
+ {l:'adv',q:'How do you choose Kafka partition count and keying strategy?',a:'Key by the aggregate ID whose events must stay ordered relative to each other (e.g. orderId); size partition count against target peak throughput and desired consumer parallelism, with headroom, since increasing it later can disturb existing key-based ordering.'},
+ {l:'exp',q:'How do you design for 99.99% availability?',a:'Redundancy at every tier, multi-AZ placement with correctly configured failure-domain awareness, health-based alerting well ahead of saturation, automated failover tested regularly (not just documented), and a clear RPO/RTO tied to actual business requirements rather than an arbitrary aspiration.'},
+ {l:'exp',q:'How do you diagnose a memory leak in production?',a:'Heap dumps taken under sustained load, compared over time for a steadily growing collection — usually an unbounded cache or a listener/subscription that\'s never removed. A scheduled restart is a stopgap, not a fix.'},
+ {l:'exp',q:'What causes a Kubernetes rebalance-style CrashLoopBackOff and how do you fix it?',a:'Usually a failing liveness probe with too aggressive a timeout, a missing config/secret at startup, or an unhandled exception during initialization (e.g. a bad DB connection string in a new deploy) — diagnose with `kubectl describe pod` and the previous container\'s logs.'},
+ {l:'exp',q:'How would you migrate a monolith to microservices with minimal risk?',a:'Strangler Fig: extract one bounded context at a time behind the existing API surface so clients don\'t notice, give the extracted service its own database, incrementally shift traffic, validate in production, and repeat — never a big-bang rewrite.'},
+ {l:'arc',q:'How do you decide between choreography and orchestration for a given saga?',a:'Choreography for short, few-step flows where service autonomy matters most; orchestration once the flow grows complex enough (many steps, many compensations) that implicit event-chain visibility becomes a genuine operational liability — the orchestrator itself then becomes critical infrastructure that must be highly available.'},
+ {l:'arc',q:'How do you decide when a system has outgrown microservices-lite into needing full cloud-native investment (Part 35\'s Phase 5/6)?',a:'When the felt pain shifts from "deployment coordination is annoying" to "manual infrastructure operations are the bottleneck to shipping" or "our actual availability/scale requirements now demand multi-AZ/region investment" — the architecture should follow a demonstrated need, not be adopted preemptively for its own sake.'},
+ {l:'arc',q:'How do you defend a chosen architecture in a design review?',a:'Walk the decision framework out loud for every non-obvious choice: the problem it solves, the alternatives considered, the trade-offs accepted, the failure mode, and how it scales and costs — an architecture that can\'t be defended this way probably wasn\'t actually decided, just defaulted into.'},
+ {l:'arc',q:'What is the single most common cause of "distributed monolith"?',a:'Service boundaries drawn around technical layers or convenience rather than actual bounded contexts, combined with a shared database or shared business-logic library that forces coordinated deploys — the services are separately deployable in name only.'},
+];
+const qabank=document.getElementById('qabank');
+function renderQA(filter){
+  qabank.innerHTML='';
+  QA.filter(x=>filter==='all'||x.l===filter).forEach((item)=>{
+    const div=document.createElement('div'); div.className='qa';
+    const badgeText={beg:'🟢 beginner',int:'🔵 intermediate',adv:'🟠 advanced',exp:'🔴 expert',arc:'🟣 architect'}[item.l];
+    div.innerHTML=`<div class="qa-q"><span>${item.q}</span><span class="qn">${badgeText}</span></div><div class="qa-a">${item.a}</div>`;
+    div.querySelector('.qa-q').onclick=()=>div.classList.toggle('open');
+    qabank.appendChild(div);
+  });
+}
+renderQA('all');
+document.querySelectorAll('#qfilters .filterbtn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#qfilters .filterbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); renderQA(b.dataset.f);
+  };
+});
+
+/* ================= FLASHCARDS ================= */
+const CARDS=[
+ ["Bounded Context","A boundary within which a domain model and its terminology are consistent and unambiguous."],
+ ["Database-per-service","Each service owns its schema exclusively — no other service ever queries it directly."],
+ ["Outbox Pattern","Business row + event row written in one local transaction; a separate publisher ships events reliably."],
+ ["Saga","A sequence of local transactions across services, each with a defined compensating action, replacing a single ACID transaction."],
+ ["Circuit Breaker","Stops calling a failing dependency after a threshold, failing fast with a fallback instead of queuing forever."],
+ ["Bulkhead","Isolated resource pools per dependency so one slow dependency can't exhaust resources needed for a healthy one."],
+ ["CAP theorem","During a network partition, choose consistency or availability — you can't have both."],
+ ["Idempotency Key","A client-supplied token letting the server safely dedupe a retried non-idempotent request like a payment charge."],
+ ["Readiness probe","Kubernetes check answering whether a pod should currently receive traffic."],
+ ["Strangler Fig","Incrementally extracting bounded contexts from a monolith behind its existing API, rather than a big-bang rewrite."],
+ ["PACELC","Extends CAP: even without a partition, you still trade latency against consistency in normal operation."],
+ ["Anti-Corruption Layer","A translation layer preventing an external or legacy model from leaking into your own bounded context."],
+];
+let flashIdx=0;
+function renderFlash(){
+  const c=document.getElementById('flashcard');
+  c.classList.remove('flip');
+  c.querySelector('.face-a').textContent=CARDS[flashIdx][0];
+  c.querySelector('.face-b').textContent=CARDS[flashIdx][1];
+}
+document.getElementById('flashcard').onclick=function(){ this.classList.toggle('flip'); };
+function flashNext(){ flashIdx=(flashIdx+1)%CARDS.length; renderFlash(); }
+function flashPrev(){ flashIdx=(flashIdx-1+CARDS.length)%CARDS.length; renderFlash(); }
+function flashRandom(){ flashIdx=Math.floor(Math.random()*CARDS.length); renderFlash(); }
+renderFlash();
+
+/* ================= QUIZ ================= */
+const QUIZ=[
+ {q:"Two services each own their own database and must stay consistent for one business transaction. What's the standard microservices approach?",
+  opts:["Two-Phase Commit (2PC)","Saga with compensating actions","A shared database","Synchronous REST calls with retries"],
+  correct:1, exp:"Saga accepts eventual consistency in exchange for availability and service independence — the standard trade-off in microservices, versus 2PC's locking cost."},
+ {q:"A service saves to its database, then calls Kafka to publish an event, as two separate steps. What problem does this create?",
+  opts:["N+1 query problem","The dual-write problem","Cache stampede","Split brain"],
+  correct:1, exp:"If the DB commit succeeds but the Kafka publish fails (or vice versa), the two systems disagree about what happened — solved with the Outbox Pattern."},
+ {q:"What does a readiness probe failing cause Kubernetes to do?",
+  opts:["Restart the container","Remove the pod from Service load-balancing until it passes again","Delete the pod permanently","Scale up replicas"],
+  correct:1, exp:"Readiness controls traffic routing, not container lifecycle — that's the liveness probe's job."},
+ {q:"During an actual network partition, CAP theorem says a system must choose between which two properties?",
+  opts:["Latency and throughput","Consistency and availability","Security and performance","Scalability and cost"],
+  correct:1, exp:"CAP is specifically about behavior during a partition — you can't guarantee both perfect consistency and full availability at that moment."},
+ {q:"Why should you avoid retrying a non-idempotent write like a payment charge without an idempotency key?",
+  opts:["It wastes CPU","It can cause the customer to be charged twice","It violates REST principles","It breaks database indexing"],
+  correct:1, exp:"A retried non-idempotent write can duplicate its effect — an idempotency key lets the server recognize and safely ignore the duplicate attempt."},
+ {q:"What is the main risk of the 'shared database' anti-pattern between microservices?",
+  opts:["It's slower than REST","It creates a distributed monolith — services are tightly coupled at the data layer despite being separately deployed","It's more secure","It requires more Kafka partitions"],
+  correct:1, exp:"If services can still read/write each other's tables directly, they aren't truly independent, no matter how the code is organized."},
+];
+let quizIdx=0, quizScore=0, quizAnswered=false;
+function renderQuiz(){
+  quizAnswered=false;
+  document.getElementById('quizmeta').textContent=`Question ${quizIdx+1} of ${QUIZ.length} · score ${quizScore}`;
+  const item=QUIZ[quizIdx];
+  document.getElementById('quizq').innerHTML=`<p style="font-size:15px;font-weight:600;">${item.q}</p>`;
+  const optsDiv=document.getElementById('quizopts'); optsDiv.innerHTML='';
+  item.opts.forEach((opt,i)=>{
+    const b=document.createElement('button'); b.className='quiz-opt'; b.textContent=opt;
+    b.onclick=()=>{
+      if(quizAnswered) return; quizAnswered=true;
+      document.querySelectorAll('.quiz-opt').forEach((el,j)=>{
+        if(j===item.correct) el.classList.add('correct');
+        else if(j===i) el.classList.add('wrong');
+      });
+      if(i===item.correct) quizScore++;
+      const exp=document.createElement('p'); exp.style.cssText='margin-top:10px;color:var(--muted);font-size:13px;';
+      exp.textContent=item.exp+"  ";
+      const next=document.createElement('button'); next.className='hbtn'; next.style.marginLeft='6px';
+      next.textContent = quizIdx<QUIZ.length-1 ? 'Next question →' : 'Restart quiz';
+      next.onclick=()=>{ quizIdx = quizIdx<QUIZ.length-1 ? quizIdx+1 : 0; if(quizIdx===0) quizScore=0; renderQuiz(); };
+      exp.appendChild(next);
+      optsDiv.appendChild(exp);
+      document.getElementById('quizmeta').textContent=`Question ${quizIdx+1} of ${QUIZ.length} · score ${quizScore}`;
+    };
+    optsDiv.appendChild(b);
+  });
+}
+renderQuiz();
+</script>
+</body>
+</html>
