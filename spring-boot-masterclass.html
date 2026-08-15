@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spring & Spring Boot Masterclass</title>
+    <meta
+      name="description"
+      content="Spring Framework and Spring Boot tutorial from beginner to architect, covering IoC, AOP, MVC, transactions, security, JPA, microservices, Kafka, cloud-native deployment, interviews and production architecture."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+    <style>
+      :root{
+        --bg:#0a0e14; --panel:#111722; --panel-2:#161d2b; --line:#242e40;
+        --text:#dfe6ef; --muted:#8996a8;
+        --blue:#4f8ff7; --blue-dim:#1f3a63;
+        --green:#3ecf8e; --amber:#e0a340; --red:#e2685c; --purple:#b78cf0;
+        --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif; --disp:'Space Grotesk',sans-serif;
+      }
+      *{box-sizing:border-box;}
+      html{scroll-behavior:smooth;}
+      body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
+      body.light{--bg:#f5f6f8;--panel:#ffffff;--panel-2:#eef0f4;--line:#dde1e8;--text:#1a1f28;--muted:#5a6472;}
+      ::selection{background:var(--blue-dim);color:#fff;}
+      a{color:var(--blue);text-decoration:none;}
+      code,pre{font-family:var(--mono);}
+      h1,h2,h3,h4,h5{font-family:var(--disp);letter-spacing:-0.01em;margin-top:0;}
+      p,li{font-size:15px;}
+      #bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:var(--line);}
+      #bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--blue-dim),var(--blue));transition:width .15s linear;}
+      header{position:sticky;top:3px;z-index:100;display:flex;align-items:center;gap:16px;background:rgba(10,14,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 20px;}
+      body.light header{background:rgba(245,246,248,.92);}
+      .brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:15px;white-space:nowrap;}
+      .brand .mark{width:11px;height:11px;border:2px solid var(--blue);border-radius:2px;transform:rotate(45deg);}
+      .brand small{color:var(--muted);font-weight:400;font-size:11px;display:block;letter-spacing:.06em;font-family:var(--sans);}
+      #search{flex:1;max-width:440px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:13px;}
+      #search:focus{outline:1px solid var(--blue);}
+      .hbtn{background:transparent;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:12px;}
+      .hbtn:hover{border-color:var(--blue);color:var(--blue);}
+      #partIndicator{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+      #partIndicator b{color:var(--blue);}
+      #shell{display:flex;max-width:1500px;margin:0 auto;}
+      nav#sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--line);height:calc(100vh - 51px);position:sticky;top:54px;overflow-y:auto;padding:14px 0 60px;}
+      nav#sidebar::-webkit-scrollbar{width:6px;}
+      nav#sidebar::-webkit-scrollbar-thumb{background:var(--line);}
+      .navgroup-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);padding:14px 18px 6px;text-transform:uppercase;}
+      .navitem{display:flex;gap:10px;align-items:baseline;padding:6px 18px;font-size:13px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;}
+      .navitem:hover{color:var(--text);background:var(--panel-2);}
+      .navitem.active{color:var(--blue);border-left-color:var(--blue);background:var(--panel-2);}
+      .navitem .off{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:26px;}
+      .navitem.active .off{color:var(--blue);}
+      main{flex:1;min-width:0;padding:0 44px 100px;}
+      .section{padding-top:70px;margin-top:-40px;}
+      .section-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:22px;}
+      .section-head h2{font-size:25px;margin:0;}
+      .badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:3px;font-weight:600;}
+      .badge.f{background:#173a24;color:#7fd996;} .badge.d{background:#122a45;color:#6fb7e8;} .badge.a{background:#3a2a10;color:#e0a340;} .badge.x{background:#3a1616;color:#e2685c;} .badge.arc{background:#2a1a40;color:#c69bef;}
+      .lead{color:var(--muted);font-size:15px;max-width:820px;}
+      .callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;font-size:14px;}
+      .callout.green{border-left-color:var(--green);} .callout.red{border-left-color:var(--red);} .callout.amber{border-left-color:var(--amber);} .callout.purple{border-left-color:var(--purple);}
+      .callout b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:6px;}
+      .callout.green b{color:var(--green);} .callout.red b{color:var(--red);} .callout.amber b{color:var(--amber);} .callout.purple b{color:var(--purple);}
+      table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.3px;}
+      th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+      th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+      tr:hover td{background:var(--panel);}
+      pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;overflow-x:auto;font-size:12.6px;margin:14px 0;white-space:pre-wrap;word-wrap:break-word;}
+      code{font-family:var(--mono);}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;} .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+      @media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+      .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;}
+      .card h4{margin:0 0 8px;font-size:14px;color:var(--blue);}
+      .mermaid{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0;overflow-x:auto;text-align:center;}
+      .qa{border:1px solid var(--line);border-radius:8px;margin:10px 0;background:var(--panel);}
+      .qa-q{padding:13px 16px;cursor:pointer;font-size:13.8px;font-weight:600;display:flex;justify-content:space-between;gap:10px;}
+      .qa-q .qn{color:var(--muted);font-family:var(--mono);font-size:11px;white-space:nowrap;}
+      .qa-a{display:none;padding:0 16px 16px;font-size:13.3px;color:var(--muted);}
+      .qa.open .qa-a{display:block;} .qa.open .qa-q{color:var(--blue);}
+      .checklist{list-style:none;padding:0;margin:10px 0;}
+      .checklist li{padding:7px 0 7px 30px;position:relative;font-size:13.8px;border-bottom:1px dashed var(--line);}
+      .checklist li::before{content:'☐';position:absolute;left:0;color:var(--blue);font-size:16px;}
+      .hero{padding:30px 0 10px;}
+      .hero h1{font-size:34px;margin-bottom:6px;}
+      .hero .sub{font-family:var(--mono);color:var(--blue);font-size:14px;margin-bottom:14px;}
+      .hero .stack{color:var(--muted);font-size:13px;font-family:var(--mono);margin-bottom:20px;}
+      footer{border-top:1px solid var(--line);padding:40px 20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;}
+      #toTop{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--line);color:var(--muted);width:38px;height:38px;border-radius:50%;cursor:pointer;display:none;font-family:var(--mono);z-index:150;}
+      #toTop:hover{border-color:var(--blue);color:var(--blue);}
+      .hidden-by-search{display:none !important;}
+      .tiny{font-size:12px;color:var(--muted);}
+      @media(max-width:1000px){nav#sidebar{display:none;} main{padding:0 18px 100px;}}
+    </style>
+  </head>
+  <body>
+    <div id="bar"><div id="fill"></div></div>
+    <header>
+      <div class="brand"><span class="mark"></span><div>SPRING MASTERCLASS<small>Beginner → Architect · Spring 7 / Boot 4</small></div></div>
+      <input id="search" placeholder="Search Spring concepts, versions, interview topics…" />
+      <span id="partIndicator">part <b id="partNow">00</b> / <span id="partMax">34</span></span>
+      <button class="hbtn" id="themeBtn">☾ theme</button>
+    </header>
+    <div id="shell">
+      <nav id="sidebar">
+        <div class="navgroup-label">Foundation</div>
+        <div class="navitem active" data-target="intro"><span class="off">00</span> Intro</div>
+        <div class="navitem" data-target="version-evolution"><span class="off">01</span> Version Evolution</div>
+        <div class="navitem" data-target="roadmap"><span class="off">02</span> Learning Roadmap</div>
+        <div class="navitem" data-target="fundamentals"><span class="off">03</span> Spring Fundamentals</div>
+        <div class="navitem" data-target="ioc"><span class="off">04</span> IoC</div>
+        <div class="navitem" data-target="container"><span class="off">05</span> Spring Container</div>
+        <div class="navitem" data-target="beans"><span class="off">06</span> Spring Beans</div>
+        <div class="navitem" data-target="config-styles"><span class="off">07</span> Config Styles</div>
+        <div class="navitem" data-target="component-scanning"><span class="off">08</span> Component Scanning</div>
+        <div class="navitem" data-target="autowiring"><span class="off">09</span> Autowiring</div>
+        <div class="navgroup-label">Core & Web</div>
+        <div class="navitem" data-target="profiles"><span class="off">10</span> Profiles</div>
+        <div class="navitem" data-target="external-config"><span class="off">11</span> Config Properties</div>
+        <div class="navitem" data-target="spel"><span class="off">12</span> SpEL</div>
+        <div class="navitem" data-target="aop"><span class="off">13</span> AOP</div>
+        <div class="navitem" data-target="transactions"><span class="off">14</span> Transactions</div>
+        <div class="navitem" data-target="mvc"><span class="off">15</span> MVC</div>
+        <div class="navitem" data-target="rest"><span class="off">16</span> REST APIs</div>
+        <div class="navitem" data-target="validation"><span class="off">17</span> Validation</div>
+        <div class="navitem" data-target="exception-handling"><span class="off">18</span> Exceptions</div>
+        <div class="navitem" data-target="data"><span class="off">19</span> Spring Data</div>
+        <div class="navitem" data-target="jpa"><span class="off">20</span> JPA / Hibernate</div>
+        <div class="navitem" data-target="relationships"><span class="off">21</span> Relationships</div>
+        <div class="navitem" data-target="db-performance"><span class="off">22</span> DB Performance</div>
+        <div class="navgroup-label">Boot & Production</div>
+        <div class="navitem" data-target="boot"><span class="off">23</span> Spring Boot</div>
+        <div class="navitem" data-target="auto-config"><span class="off">24</span> Auto Config</div>
+        <div class="navitem" data-target="starters"><span class="off">25</span> Starters</div>
+        <div class="navitem" data-target="maven-gradle"><span class="off">26</span> Maven / Gradle</div>
+        <div class="navitem" data-target="boot-config"><span class="off">28</span> Boot Config</div>
+        <div class="navitem" data-target="logging"><span class="off">29</span> Logging</div>
+        <div class="navitem" data-target="security"><span class="off">30</span> Security</div>
+        <div class="navitem" data-target="jwt"><span class="off">31</span> JWT</div>
+        <div class="navitem" data-target="oauth"><span class="off">32</span> OAuth2 / OIDC</div>
+        <div class="navitem" data-target="testing"><span class="off">33</span> Testing</div>
+        <div class="navitem" data-target="actuator"><span class="off">34</span> Actuator</div>
+        <div class="navitem" data-target="observability"><span class="off">35</span> Observability</div>
+        <div class="navitem" data-target="cache"><span class="off">36</span> Cache</div>
+        <div class="navitem" data-target="async"><span class="off">37</span> Async</div>
+        <div class="navitem" data-target="webflux"><span class="off">38</span> WebFlux</div>
+        <div class="navgroup-label">Architecture</div>
+        <div class="navitem" data-target="microservices"><span class="off">39</span> Microservices</div>
+        <div class="navitem" data-target="spring-cloud"><span class="off">40</span> Spring Cloud</div>
+        <div class="navitem" data-target="kafka"><span class="off">41</span> Kafka + Spring</div>
+        <div class="navitem" data-target="eda"><span class="off">42</span> Event Driven</div>
+        <div class="navitem" data-target="resilience"><span class="off">43</span> Resilience</div>
+        <div class="navitem" data-target="performance"><span class="off">44</span> Performance</div>
+        <div class="navitem" data-target="startup-internals"><span class="off">45</span> Boot Startup</div>
+        <div class="navitem" data-target="request-flow"><span class="off">46</span> Request Flow</div>
+        <div class="navitem" data-target="architecture-patterns"><span class="off">47</span> Architecture</div>
+        <div class="navitem" data-target="design-patterns"><span class="off">48</span> Design Patterns</div>
+        <div class="navitem" data-target="production-architecture"><span class="off">49</span> Production Arch</div>
+        <div class="navitem" data-target="cloud-native"><span class="off">50</span> Cloud Native</div>
+        <div class="navitem" data-target="native-aot"><span class="off">51</span> Native / AOT</div>
+        <div class="navitem" data-target="security-best-practices"><span class="off">52</span> Security Checklist</div>
+        <div class="navitem" data-target="production-config"><span class="off">53</span> Prod Config</div>
+        <div class="navitem" data-target="real-project"><span class="off">54</span> Banking Project</div>
+        <div class="navitem" data-target="code-quality"><span class="off">55</span> Code Quality</div>
+        <div class="navitem" data-target="common-mistakes"><span class="off">56</span> Common Mistakes</div>
+        <div class="navitem" data-target="interview-prep"><span class="off">57</span> Interview Prep</div>
+        <div class="navitem" data-target="troubleshooting"><span class="off">58</span> Troubleshooting</div>
+        <div class="navitem" data-target="tools"><span class="off">59</span> Tools</div>
+        <div class="navitem" data-target="final-architecture"><span class="off">60</span> Final Architecture</div>
+        <div class="navitem" data-target="cheats"><span class="off">61</span> Cheat Sheets</div>
+      </nav>
+      <main id="main">
+        <section class="section hero" id="intro">
+          <h1>Spring Framework & Spring Boot Masterclass</h1>
+          <div class="sub">From Java Fundamentals to Enterprise Architecture with current Spring standards</div>
+          <div class="stack">Java 21 / Spring 6.x → 7.x / Spring Boot 3.x → 4.x / Boot 3.5 / Cloud Native / Microservices / Security / Kafka</div>
+          <div class="mermaid">
+            flowchart TD
+            A[Java Fundamentals] --> B[Spring Core]
+            B --> C[Spring MVC]
+            C --> D[Spring Boot]
+            D --> E[Spring Data]
+            E --> F[Security]
+            F --> G[Testing]
+            G --> H[Production]
+            H --> I[Microservices]
+            I --> J[Distributed Systems]
+            J --> K[Cloud Native]
+            K --> L[Performance]
+            L --> M[Architecture]
+            M --> N[Enterprise Architecture]
+          </div>
+          <p class="lead">This tutorial is designed for a Java developer with 13+ years of experience who wants to understand not just how to use Spring, but why Spring works this way, how the internals fit together, when to use or avoid each pattern, and how to defend architecture choices under production and interview pressure.</p>
+          <div class="callout purple"><b>What matters</b>We prioritize current official Spring documentation and version-aware guidance. We do not mix old and new APIs in the same example. We explicitly show what is current, legacy, deprecated, removed, and version-specific.</div>
+        </section>
+
+        <section class="section" id="version-evolution">
+          <div class="section-head"><h2>01 · Spring Version Evolution</h2><span class="badge d">current + history</span></div>
+          <p class="lead">The ecosystem evolved from XML-heavy enterprise Java to lightweight POJO-based development, then to modern Boot, Jakarta EE, Java 17+, and cloud-native operations.</p>
+          <table>
+            <tr><th>Generation</th><th>Release</th><th>Java baseline</th><th>Spring framework</th><th>Major changes</th><th>Production status</th></tr>
+            <tr><td>Spring 1.x</td><td>2003-2004</td><td>J2EE era</td><td>1.x</td><td>Core container, XML config, basic AOP</td><td>Legacy</td></tr>
+            <tr><td>Spring 2.x</td><td>2006-2007</td><td>Java 5</td><td>2.x</td><td>Annotations, AOP refinements</td><td>Legacy</td></tr>
+            <tr><td>Spring 3.x</td><td>2009-2012</td><td>Java 5/6</td><td>3.x</td><td>JavaConfig, @MVC, expression language, improvements</td><td>Legacy but still seen</td></tr>
+            <tr><td>Spring 4.x</td><td>2013-2016</td><td>Java 6/7</td><td>4.x</td><td>HTML5 support, better MVC, Java EE 7 base</td><td>Legacy</td></tr>
+            <tr><td>Spring 5.x</td><td>2017-2022</td><td>Java 8+</td><td>5.x</td><td>Reactive stack, WebFlux, JDK 8 baseline</td><td>Stable legacy</td></tr>
+            <tr><td>Spring 6.x</td><td>2022</td><td>Java 17+</td><td>6.x</td><td>Jakarta EE 9+, javax → jakarta, Hibernate 6, Servlet 6</td><td>Current baseline</td></tr>
+            <tr><td>Spring 7.x</td><td>2025</td><td>Java 17+ / 21+ aligned</td><td>7.x</td><td>Framework modernization, AOT, observability, Boot 4 alignment</td><td>Current / future</td></tr>
+          </table>
+          <h3>Spring Boot evolution</h3>
+          <table>
+            <tr><th>Version</th><th>Release period</th><th>Spring Framework</th><th>Java baseline</th><th>Notes</th></tr>
+            <tr><td>Boot 1.x</td><td>2014-2016</td><td>4.x</td><td>Java 7/8</td><td>Early auto-configuration, opinionated defaults</td></tr>
+            <tr><td>Boot 2.x</td><td>2018-2022</td><td>5.x</td><td>Java 8</td><td>Production improvements, Actuator, Cloud, stable defaults</td></tr>
+            <tr><td>Boot 3.x</td><td>2022-2024</td><td>6.x</td><td>Java 17+</td><td>Jakarta migration, native support, security upgrades</td></tr>
+            <tr><td>Boot 3.5</td><td>2025</td><td>6.x</td><td>Java 17+</td><td>Current stable baseline in many enterprises</td></tr>
+            <tr><td>Boot 4.x</td><td>202x</td><td>7.x</td><td>Java 17+ / LTS alignment</td><td>Next generational shift, API modernization</td></tr>
+            <tr><td>Boot 4.1</td><td>202x</td><td>7.x</td><td>Java 17+/21+</td><td>Future roadmap; watch release notes before adopting</td></tr>
+          </table>
+          <div class="callout"><b>Spring 5 → Spring 6</b>Spring 6 is not a small jump. It moves the framework to Jakarta EE 9+, meaning javax.* becomes jakarta.*. That changes servlet APIs, validation APIs, JPA APIs, and security APIs. Hibernate 6 and Servlet 6 align with this. Spring Boot 3 is built for Java 17+ and this baseline change is the main migration driver for enterprise teams.</div>
+          <div class="callout red"><b>Boot 2 → Boot 3</b>One of the largest breakages in enterprise Java was the namespace migration from javax.* to jakarta.*. Example: javax.servlet.* becomes jakarta.servlet.*; javax.validation.* becomes jakarta.validation.*; javax.persistence.* becomes jakarta.persistence.*.</div>
+          <pre><code>// Spring Boot 2.x (legacy)
+import javax.validation.Valid;
+import javax.persistence.Entity;
+import javax.servlet.http.HttpServletRequest;
+
+@Entity
+public class Customer {
+  @Valid
+  private String name;
+}
+
+// Spring Boot 3.x (current)
+import jakarta.validation.Valid;
+import jakarta.persistence.Entity;
+import jakarta.servlet.http.HttpServletRequest;
+
+@Entity
+public class Customer {
+  @Valid
+  private String name;
+}</code></pre>
+          <h3>Version designations and correctness</h3>
+          <div class="grid2">
+            <div class="card"><h4>Current</h4>Spring Framework 6.2.x / 7.x, Spring Boot 3.3-3.5+, Java 17-21 LTS, Jakarta EE namespaces, Boot 3 current standard for new greenfield work.</div>
+            <div class="card"><h4>Legacy</h4>Spring 5 / Boot 2, Java 8/11, javax.* APIs, older servlet/container integrations.</div>
+            <div class="card"><h4>Deprecated</h4>Some XML configuration patterns and old security config classes are still in docs for migration guidance but not recommended for new apps.</div>
+            <div class="card"><h4>Removed</h4>Old `WebSecurityConfigurerAdapter` patterns, some old servlet APIs, older security setup classes, and some XML-specific approaches are removed in modern Boot 3+/6+.</div>
+          </div>
+          <div class="callout amber"><b>Why old versions still exist</b>Companies often keep older Spring versions because of framework freeze, legacy container support, deeper Java 8/11 compatibility, regulatory constraints, or long-lived enterprise apps. Upgrading is not just a library bump; it changes the Java baseline, JPA API, validation API, security rules, servlet APIs, and deployment assumptions.</div>
+        </section>
+
+        <section class="section" id="roadmap">
+          <div class="section-head"><h2>02 · Learning Roadmap</h2><span class="badge f">roadmap</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Java Fundamentals] --> B[Spring Fundamentals]
+            B --> C[Spring Core]
+            C --> D[Spring MVC]
+            D --> E[Spring Boot]
+            E --> F[Spring Data]
+            F --> G[Spring Security]
+            G --> H[Testing]
+            H --> I[Production]
+            I --> J[Microservices]
+            J --> K[Distributed Systems]
+            K --> L[Cloud Native]
+            L --> M[Performance]
+            M --> N[Architecture]
+            N --> O[Enterprise Architecture]
+          </div>
+          <div class="grid2">
+            <div class="card"><h4>Stage 1: Java Fundamentals</h4>Prerequisites: OOP, collections, generics, exceptions, JVM basics, threads, JDBC basics. Objectives: understand class loading, memory, concurrency, lambda streams. Mini project: Student service with file reading, sorting, and some concurrency.</div>
+            <div class="card"><h4>Stage 2: Spring Fundamentals</h4>Learn the why behind Spring: POJO-based development, DI, IoC, AOP, configuration styles, bean lifecycle. Mini project: naming service, email service, order workflow service.</div>
+            <div class="card"><h4>Stage 3: MVC + REST</h4>Build controllers, request mapping, model binding, validation, exception handling, JSON serialization, OpenAPI. Mini project: user management API with DTOs and validation.</div>
+            <div class="card"><h4>Stage 4: Data + JPA</h4>Learn repositories, transactions, JPA, relationships, indexes, performance tuning. Mini project: customer-account-transaction platform with DAO and ORM.</div>
+            <div class="card"><h4>Stage 5: Security + Testing</h4>Authentication, authorization, JWT, service tests, integration tests, Testcontainers. Mini project: secured banking API.</div>
+            <div class="card"><h4>Stage 6: Production + Architecture</h4>Observability, metrics, AOT, Kubernetes, resilience, system design, event-driven patterns. Mini project: multi-service payment platform on Docker/Kubernetes.</div>
+          </div>
+        </section>
+
+        <section class="section" id="fundamentals">
+          <div class="section-head"><h2>03 · Spring Fundamentals</h2><span class="badge f">what/why/how</span></div>
+          <h3>What is Spring?</h3>
+          <p>Spring is a framework for Java applications that reduces boilerplate, encourages POJO-based development, and gives a consistent ecosystem around dependency injection, transactions, web MVC, security, data access, and testing. It was created to solve the complexity of Enterprise Java (EJB, heavy XML configuration, rigid lifecycle, difficult testability).</p>
+          <div class="grid2">
+            <div class="card"><h4>Problems with traditional Java EE</h4>Monolithic EJB APIs, container coupling, heavy XML descriptors, poor testability, difficult mocking, and high operational complexity.</div>
+            <div class="card"><h4>Problems with EJB</h4>Large component model, deployment overhead, remote/local interfaces, poor unit testability, and too much infrastructure in the application layer.</div>
+            <div class="card"><h4>Spring philosophy</h4>POJOs over legacy enterprise APIs. Dependency injection over hard-coded wiring. Declarative transactions over manual commits. AOP to separate cross-cutting concerns. Convention over configuration with Boot.</div>
+            <div class="card"><h4>Core idea</h4>Instead of classes creating their own dependencies, the framework creates and assembles object graphs. The application focuses on business behavior while Spring handles object lifecycle and wiring.</div>
+          </div>
+          <table>
+            <tr><th>Approach</th><th>Main idea</th><th>Strengths</th><th>Weaknesses</th></tr>
+            <tr><td>Traditional Java</td><td>Manual object creation and wiring</td><td>Predictable</td><td>High coupling and low testability</td></tr>
+            <tr><td>Spring</td><td>Container manages object graph and lifecycle</td><td>Loosely coupled, powerful ecosystem</td><td>Need to understand lifecycle and proxy behavior</td></tr>
+            <tr><td>Spring Boot</td><td>Spring + opinionated defaults + starters + auto-config</td><td>Fast startup, easier developer experience</td><td>Less explicit control; hidden behavior sometimes surprises teams</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="ioc">
+          <div class="section-head"><h2>04 · Inversion of Control</h2><span class="badge d">core concept</span></div>
+          <p>IoC means control of object creation and lifecycle is inverted from your application code to a framework or container. Dependency Injection is the main mechanism by which IoC is achieved.</p>
+          <div class="mermaid">
+            flowchart LR
+            A[Application Code] --> B[Dependency Lookup]
+            A --> C[Dependency Injection]
+            C --> D[Container creates and wires objects]
+            B --> E[Manual lookup from factory/context]
+          </div>
+          <div class="grid2">
+            <div class="card"><h4>Dependency Injection</h4>Dependencies are provided externally rather than built with `new` inside the class.</div>
+            <div class="card"><h4>Dependency Lookup</h4>Object asks a container or factory for dependencies. Service Locator pattern is an example of this older style.</div>
+            <div class="card"><h4>Constructor injection</h4>Dependencies are passed in the constructor; immutable and easy to test.</div>
+            <div class="card"><h4>Setter injection</h4>Dependencies are set after object construction; useful for optional dependencies but less explicit.</div>
+          </div>
+          <pre><code>class OrderService {
+    private final PaymentService paymentService;
+
+    OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+}</code></pre>
+          <p>Spring creates the `PaymentService`, creates an `OrderService` instance, and injects the dependency at bean creation time. This is why constructor injection is preferred in modern Spring apps: it enforces required dependencies, supports immutability, and makes tests simpler.</p>
+          <div class="callout green"><b>Why constructor injection wins</b>1. Required dependencies are explicit. 2. Object is valid immediately after construction. 3. Easier unit testing and mocking. 4. Better for immutability and thread safety. 5. Works well with final fields and modern design.</div>
+          <table>
+            <tr><th>Type</th><th>Pros</th><th>Cons</th><th>Recommendation</th></tr>
+            <tr><td>Field injection</td><td>Concise</td><td>Hidden dependencies, harder to test, not final</td><td>Avoid in production</td></tr>
+            <tr><td>Setter injection</td><td>Flexible and optional</td><td>Mutability, less clear lifecycle</td><td>Use for optional configuration only</td></tr>
+            <tr><td>Constructor injection</td><td>Clear, immutable, testable</td><td>More boilerplate</td><td>Preferred</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="container">
+          <div class="section-head"><h2>05 · Spring Container</h2><span class="badge d">internals</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Application] --> B[ApplicationContext]
+            B --> C[Bean Definitions]
+            C --> D[Bean Creation]
+            D --> E[Dependency Injection]
+            E --> F[Bean Lifecycle]
+            F --> G[Application Ready]
+          </div>
+          <p>The Spring container is the runtime environment responsible for managing beans and their dependencies. It reads configuration metadata, builds object graphs, invokes lifecycle callbacks, and populates the application context.</p>
+          <div class="grid2">
+            <div class="card"><h4>BeanFactory</h4>Low-level container, minimal functionality, lazy loading. Good for lightweight infrastructure, but less rich than ApplicationContext.</div>
+            <div class="card"><h4>ApplicationContext</h4>Full-featured container used by most apps. Adds internationalization, resource loading, event handling, BeanPostProcessor integration, and richer lifecycle support.</div>
+            <div class="card"><h4>GenericApplicationContext</h4>Flexible, generic container used for non-web apps and custom setup.</div>
+            <div class="card"><h4>AnnotationConfigApplicationContext</h4>Loads configuration classes annotated with `@Configuration`, scanning packages and registering beans.</div>
+            <div class="card"><h4>WebApplicationContext</h4>Servlet-based application context used by Spring MVC and web apps.</div>
+            <div class="card"><h4>What happens internally</h4>Read `@Configuration`; parse bean definitions; build metadata; instantiate beans; call `BeanFactoryPostProcessor`; execute `BeanPostProcessor`s; inject properties and dependencies; invoke lifecycle methods; publish context ready events.</div>
+          </div>
+          <pre><code>AnnotationConfigApplicationContext context =
+    new AnnotationConfigApplicationContext(AppConfig.class);
+
+OrderService orderService = context.getBean(OrderService.class);
+context.close();</code></pre>
+        </section>
+
+        <section class="section" id="beans">
+          <div class="section-head"><h2>06 · Spring Beans</h2><span class="badge d">bean lifecycle</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Bean Definition] --> B[Instantiation]
+            B --> C[Dependency Injection]
+            C --> D[Aware Interface Callbacks]
+            D --> E[BeanPostProcessor beforeInit]
+            E --> F[@PostConstruct]
+            F --> G[Initialization]
+            G --> H[BeanPostProcessor afterInit]
+            H --> I[Bean Ready]
+            I --> J[@PreDestroy]
+            J --> K[Destroy]
+          </div>
+          <p>A Spring bean is a singleton-like managed object created by the container and controlled by Spring lifecycle. It is not the same as the Java Singleton pattern — a Spring singleton means one shared bean instance per Spring container, while a Java Singleton is a JVM-wide singleton enforced by your own coding pattern.</p>
+          <table>
+            <tr><th>Scope</th><th>Meaning</th><th>Use when</th></tr>
+            <tr><td>singleton</td><td>One instance per application context</td><td>Default for stateless services</td></tr>
+            <tr><td>prototype</td><td>New instance each request for bean</td><td>Stateful or short-lived objects</td></tr>
+            <tr><td>request</td><td>One instance per HTTP request</td><td>Web applications</td></tr>
+            <tr><td>session</td><td>One instance per HTTP session</td><td>User session scoped objects</td></tr>
+            <tr><td>application</td><td>One instance per ServletContext</td><td>Shared web app state</td></tr>
+            <tr><td>websocket</td><td>One instance per WebSocket session</td><td>WebSocket app state</td></tr>
+          </table>
+          <pre><code>@Component
+@Scope("prototype")
+class ShoppingCart { }
+
+@Component
+class CheckoutService {
+    private final ShoppingCart shoppingCart;
+
+    CheckoutService(ShoppingCart shoppingCart) {
+        this.shoppingCart = shoppingCart;
+    }
+}</code></pre>
+          <p>Spring does not magically make a bean singleton in the Java sense; it creates and manages one bean object per scope per container, and the scope semantics matter for proxies and thread safety.</p>
+        </section>
+
+        <section class="section" id="config-styles">
+          <div class="section-head"><h2>07 · Configuration Styles</h2><span class="badge d">XML vs Java vs annotations</span></div>
+          <div class="grid2">
+            <div class="card"><h4>XML configuration</h4>Classic Spring style using `<bean>` declarations. Common in old enterprise apps and migration work. Example: old `.xml` config with `DataSource`, `TxManager`, `BeanFactory` definitions.</div>
+            <div class="card"><h4>Java configuration</h4>`@Configuration` + `@Bean`. Very explicit, good for complex infrastructure and external library integration.</div>
+            <div class="card"><h4>Annotation configuration</h4>`@Component`, `@Service`, `@Repository`, `@Controller`, `@RestController`, `@Configuration`, plus component scanning. Most common modern style.</div>
+            <div class="card"><h4>Modern pattern</h4>Use Boot auto-configuration + component scanning + `@ConfigurationProperties` + class-based configuration. Avoid XML unless you are maintaining legacy services.</div>
+          </div>
+          <pre><code>// Java config
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public PaymentService paymentService() {
+        return new CardPaymentService();
+    }
+}</code></pre>
+          <pre><code>// XML legacy
+&lt;beans&gt;
+    &lt;bean id="paymentService" class="com.bank.CardPaymentService"/&gt;
+    &lt;bean id="orderService" class="com.bank.OrderService"&gt;
+        &lt;constructor-arg ref="paymentService"/&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;</code></pre>
+          <div class="callout red"><b>When XML is still encountered</b>Legacy enterprise systems, older Spring apps in regulated industries, legacy integration layers, or migration work where the team is actively refactoring from XML to Boot. The main risk is losing explicit lifecycle visibility and making the configuration harder to reason about.</div>
+        </section>
+
+        <section class="section" id="component-scanning">
+          <div class="section-head"><h2>08 · Component Scanning</h2><span class="badge d">@ComponentScan</span></div>
+          <p>Component scanning tells Spring “look in these packages and register classes as beans”. It is how `@Component`, `@Service`, `@Repository`, `@Controller`, and `@Configuration` classes become managed beans automatically.</p>
+          <pre><code>@Configuration
+@ComponentScan(basePackages = "com.bank")
+public class AppConfig {}</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>@Component</h4>Generic bean stereotype.</div>
+            <div class="card"><h4>@Service</h4>Business service layer.</div>
+            <div class="card"><h4>@Repository</h4>Persistence layer and exception translation.</div>
+            <div class="card"><h4>@Controller</h4>Web MVC controller.</div>
+            <div class="card"><h4>@RestController</h4>Controller + `@ResponseBody` convenience.</div>
+            <div class="card"><h4>@Configuration</h4>Configuration class defining beans and metadata.</div>
+          </div>
+          <p>Spring scans package roots, reads metadata, filters candidates, and registers them as bean definitions. The scan uses include/exclude patterns to avoid accidentally bringing in infrastructure classes, test classes, or shadow parent packages.</p>
+          <div class="callout amber"><b>Common mistakes</b>Scanning the entire application root too broadly; missing base packages; accidentally scanning test code into production; placing `@Configuration` classes in the wrong package; relying on implicit component scanning in large multi-module apps.</div>
+        </section>
+
+        <section class="section" id="autowiring">
+          <div class="section-head"><h2>09 · Autowiring</h2><span class="badge d">DI resolution</span></div>
+          <p>Autowiring asks Spring to resolve and inject collaborators automatically. Modern production code should generally prefer constructor injection over field injection, even when `@Autowired` is available.</p>
+          <pre><code>interface PaymentService {}
+
+@Service
+class CardPaymentService implements PaymentService {}
+
+@Service
+class UpiPaymentService implements PaymentService {}
+
+@Service
+class OrderService {
+    private final PaymentService paymentService;
+
+    public OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+}</code></pre>
+          <p>If there are multiple beans implementing the same interface, Spring cannot decide automatically unless you specify a primary or qualifier. This is a perfect example of the container’s resolution logic.</p>
+          <div class="grid2">
+            <div class="card"><h4>@Qualifier</h4>Pick the exact bean by name or qualifier value.</div>
+            <div class="card"><h4>@Primary</h4>Default candidate when multiple beans match.</div>
+            <div class="card"><h4>Optional dependencies</h4>Can be injected as `Optional<T>` or `@Autowired(required = false)` in older patterns.</div>
+            <div class="card"><h4>Multiple beans</h4>Spring resolves collections like `List<PaymentService>` or `Map<String, PaymentService>`.</div>
+          </div>
+          <pre><code>@Service
+@Qualifier("card")
+class CardPaymentService implements PaymentService {}
+
+@Service
+@Qualifier("upi")
+class UpiPaymentService implements PaymentService {}
+
+@Service
+class PaymentProcessor {
+    private final PaymentService paymentService;
+
+    PaymentProcessor(@Qualifier("card") PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+}</code></pre>
+        </section>
+
+        <section class="section" id="profiles">
+          <div class="section-head"><h2>10 · Spring Profiles</h2><span class="badge d">environment-specific config</span></div>
+          <p>Profiles let the same application behave differently in development, testing, QA, and production. The environment is selected by property, system property, environment variables, or launcher setting.</p>
+          <pre><code>@Profile("dev")
+@Configuration
+class DevSecurityConfig { }
+
+@Profile("prod")
+@Configuration
+class ProdSecurityConfig { }</code></pre>
+          <pre><code># application.yml
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+server:
+  port: 8081
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+server:
+  port: 8080</code></pre>
+          <div class="callout"><b>Expected file names</b>`application.yml`, `application-dev.yml`, `application-test.yml`, `application-prod.yml`</div>
+          <p>Production configuration should be explicit: external secrets, encryption, least-privilege database permissions, health checks, and environment-specific defaults. Never use a single global config for all profiles without careful review.</p>
+        </section>
+
+        <section class="section" id="external-config">
+          <div class="section-head"><h2>11 · Externalized Configuration</h2><span class="badge d">properties, YAML, env</span></div>
+          <div class="grid2">
+            <div class="card"><h4>@Value</h4>Simple property injection for a few values.</div>
+            <div class="card"><h4>Environment</h4>Platform-aware access to property sources and profiles.</div>
+            <div class="card"><h4>PropertySource</h4>Custom property definitions from files, systems, vaults, or maps.</div>
+            <div class="card"><h4>@ConfigurationProperties</h4>Strongly typed grouping of configuration values for large apps.</div>
+          </div>
+          <pre><code>@ConfigurationProperties(prefix = "app.payment")
+public class PaymentProperties {
+    private String gatewayUrl;
+    private Duration timeout;
+    private String apiKey;
+}</code></pre>
+          <p>For large applications, `@ConfigurationProperties` is better than `@Value` because it is type-safe, grouped, namespaced, documentable, and easier to validate. A single `@Value` per field becomes painful in large systems.</p>
+          <pre><code>app:
+  payment:
+    gateway-url: https://payments.acme
+    timeout: 5s
+    api-key: ${PAYMENT_API_KEY}</code></pre>
+          <div class="callout green"><b>Precedence</b>Command-line args > OS environment variables > external config files > application defaults > bundled defaults. There are many layers, and production teams should understand the exact precedence order to avoid “works on my machine” failures.</div>
+        </section>
+
+        <section class="section" id="spel">
+          <div class="section-head"><h2>12 · Spring Expression Language (SpEL)</h2><span class="badge d">expressions</span></div>
+          <p>SpEL lets Spring evaluate expressions at runtime, which is useful in security, configuration, and bean wiring. It supports method invocation, property access, relational logic, collection access, and conditional logic.</p>
+          <pre><code>@Value("#{systemProperties['user.country']}")
+private String country;
+
+@Value("#{order.total > 1000 ? 'VIP' : 'STANDARD'}")
+private String customerTier;</code></pre>
+          <p>It is used in modern Spring Security expressions and configuration, but it should not be overused for business logic. Keep business rules in normal Java code rather than magical strings.</p>
+        </section>
+
+        <section class="section" id="aop">
+          <div class="section-head"><h2>13 · AOP</h2><span class="badge d">cross-cutting concerns</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[Client] --> B[Proxy]
+            B --> C[Advice]
+            C --> D[Target Object]
+          </div>
+          <p>Aspect-Oriented Programming handles cross-cutting concerns such as logging, transaction boundaries, security, metrics, and auditing without scattering them through business code. Spring AOP is proxy-based and usually applied to Spring-managed beans.</p>
+          <div class="grid2">
+            <div class="card"><h4>Aspect</h4>A modular unit encapsulating cross-cutting logic.</div>
+            <div class="card"><h4>Join point</h4>Specific execution point such as method invocation.</div>
+            <div class="card"><h4>Pointcut</h4>Expression that selects join points.</div>
+            <div class="card"><h4>Advice</h4>Action executed before/after/around a join point.</div>
+            <div class="card"><h4>Proxy</h4>Intercepting object that adds behavior.</div>
+            <div class="card"><h4>Target</h4>The actual business object.</div>
+          </div>
+          <pre><code>@Aspect
+@Component
+class LoggingAspect {
+    @Before("execution(* com.bank.service.*.*(..))")
+    public void logBefore() {
+        System.out.println("Calling service method...");
+    }
+}</code></pre>
+          <p>Spring AOP uses JDK dynamic proxies for interfaces and CGLIB for class-based proxies. The self-invocation problem is important: a method calling another method on the same bean does not trigger the proxy, so AOP advice may not run as expected.</p>
+          <div class="callout red"><b>Self-invocation problem</b>If `methodA()` calls `methodB()` on the same bean, the AOP proxy does not intercept the internal call. For transactions, this is a frequent cause of surprising behavior. Use external service boundaries or `@Transactional` at the service layer, not inside the same class.</div>
+        </section>
+
+        <section class="section" id="transactions">
+          <div class="section-head"><h2>14 · Transactions</h2><span class="badge arc">deep dive</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[Transactional Method] --> B[Spring Proxy]
+            B --> C[TransactionInterceptor]
+            C --> D[PlatformTransactionManager]
+            D --> E[Database]
+          </div>
+          <p>Transactions guarantee atomicity, consistency, isolation, and durability (ACID) for business operations. In Spring, the transaction boundary is often the service layer. Annotations make declarative transaction management easy, but correct usage requires understanding propagation and rollback rules.</p>
+          <table>
+            <tr><th>Propagation</th><th>Meaning</th><th>Typical Use</th></tr>
+            <tr><td>REQUIRED</td><td>Join existing transaction or start new one</td><td>Default; most business operations</td></tr>
+            <tr><td>REQUIRES_NEW</td><td>Always start a new transaction</td><td>Audit, notifications</td></tr>
+            <tr><td>NESTED</td><td>Nested savepoint-based transaction</td><td>Specific DB support needed</td></tr>
+            <tr><td>SUPPORTS</td><td>Run within transaction if one exists</td><td>Read-only ops</td></tr>
+            <tr><td>NOT_SUPPORTED</td><td>Execute without transaction</td><td>Batch or read-only non-transactional work</td></tr>
+            <tr><td>MANDATORY</td><td>Must be called with existing transaction</td><td>API contract enforcement</td></tr>
+            <tr><td>NEVER</td><td>Must not run within existing transaction</td><td>Strict separation</td></tr>
+          </table>
+          <pre><code>@Transactional
+public void transferFunds(Long fromId, Long toId, BigDecimal amount) {
+    // debit account
+    // credit account
+    // persist audit event
+}</code></pre>
+          <p>Rollback rules: unchecked exceptions (`RuntimeException`, `Error`) cause rollback by default; checked exceptions do not unless configured. The `rollbackFor` and `noRollbackFor` attributes are used when a business-specific checked exception should trigger rollback or not.</p>
+          <div class="grid2">
+            <div class="card"><h4>Isolation</h4>READ_UNCOMMITTED, READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE. Higher isolation reduces anomalies but increases lock contention.</div>
+            <div class="card"><h4>Dirty read</h4>One transaction reads uncommitted data from another. Avoid with higher isolation.</div>
+            <div class="card"><h4>Non-repeatable read</h4>Rows change between reads in the same transaction.</div>
+            <div class="card"><h4>Phantom read</h4>New rows appear due to concurrent inserts during a range query.</div>
+          </div>
+          <div class="callout amber"><b>Common transaction mistakes</b>Not placing `@Transactional` at the service layer; using too broad boundaries; calling a method from inside the same class; using `REQUIRES_NEW` in loops without considering performance; Hidden DB-level locks; mismatched rollback semantics.</div>
+        </section>
+
+        <section class="section" id="mvc">
+          <div class="section-head"><h2>15 · Spring MVC</h2><span class="badge d">web stack</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Client] --> B[HTTP Request]
+            B --> C[DispatcherServlet]
+            C --> D[HandlerMapping]
+            D --> E[Controller]
+            E --> F[Service]
+            F --> G[Repository]
+            G --> H[Database]
+            H --> I[Response to Client]
+          </div>
+          <p>Spring MVC is a request-driven web framework built around the `DispatcherServlet`, which dispatches to controllers, handles method arguments, resolves views, converts request/response data, and manages exception flow.</p>
+          <div class="grid2">
+            <div class="card"><h4>DispatcherServlet</h4>Main front controller for HTTP requests.</div>
+            <div class="card"><h4>HandlerMapping</h4>Map request to handler method.</div>
+            <div class="card"><h4>HandlerAdapter</h4>Invoke the controller method with the right signature.</div>
+            <div class="card"><h4>ViewResolver</h4>Resolve view names to actual templates.</div>
+            <div class="card"><h4>HttpMessageConverter</h4>Convert JSON/XML to objects and vice versa.</div>
+            <div class="card"><h4>ExceptionResolver</h4>Convert exceptions into HTTP responses.</div>
+          </div>
+          <pre><code>@RestController
+@RequestMapping("/api/orders")
+class OrderController {
+    private final OrderService orderService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrder(id));
+    }
+}</code></pre>
+        </section>
+
+        <section class="section" id="rest">
+          <div class="section-head"><h2>16 · REST APIs</h2><span class="badge d">HTTP design</span></div>
+          <p>REST is about resources, stateless interactions, standard HTTP methods, and meaningful representations. In production, careful API design matters more than a clever framework.</p>
+          <table>
+            <tr><th>Method</th><th>Intent</th><th>Idempotency</th></tr>
+            <tr><td>GET</td><td>Read resource</td><td>Yes</td></tr>
+            <tr><td>POST</td><td>Create new resource / command</td><td>No</td></tr>
+            <tr><td>PUT</td><td>Replace or upsert resource</td><td>Yes</td></tr>
+            <tr><td>PATCH</td><td>Partial update</td><td>Usually not guaranteed</td></tr>
+            <tr><td>DELETE</td><td>Delete resource</td><td>Usually yes with proper semantics</td></tr>
+          </table>
+          <pre><code>@PostMapping("/customers")
+public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest request) {
+    CustomerResponse response = customerService.create(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+}</code></pre>
+          <p>In enterprise APIs, use DTOs instead of exposing JPA entities directly. Keep API contracts stable, validate incoming payloads, return consistent error envelopes, and provide correct idempotency keys or deduplication semantics for payment or order creation endpoints.</p>
+        </section>
+
+        <section class="section" id="validation">
+          <div class="section-head"><h2>17 · Validation</h2><span class="badge d">Jakarta Validation</span></div>
+          <p>Validation ensures that incoming data is acceptable before it reaches business logic. Spring Boot 3 uses Jakarta Validation and Bean Validation APIs.</p>
+          <pre><code>@Data
+public class CustomerRequest {
+    @NotBlank
+    private String name;
+
+    @Email
+    private String email;
+
+    @Size(min = 8, max = 30)
+    private String password;
+}</code></pre>
+          <p>Use `@Valid` or `@Validated` on controller parameters. For APIs, centralize validation errors into a standard response such as:</p>
+          <pre><code>{
+  "timestamp": "2026-08-15T01:49:35Z",
+  "status": 400,
+  "error": "Validation Failed",
+  "message": "Request validation failed",
+  "path": "/api/customers",
+  "errors": [
+    {"field":"email","message":"must be a well-formed email address"}
+  ]
+}</code></pre>
+          <div class="callout"><b>Rule</b>Validate at boundaries, not everywhere. Validate HTTP input and domain invariants, but keep domain rules in domain services.</div>
+        </section>
+
+        <section class="section" id="exception-handling">
+          <div class="section-head"><h2>18 · Exception Handling</h2><span class="badge d">global error handling</span></div>
+          <p>Exception handling is one of the most important parts of production-grade API design. Business exceptions should be specific, consistent, and secure. Do not leak database errors or stack traces to clients.</p>
+          <pre><code>@RestControllerAdvice
+public class ApiExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.validation(ex));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiErrorResponse.notFound(ex.getMessage()));
+    }
+}</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>@ExceptionHandler</h4>Method-level exception mapping.</div>
+            <div class="card"><h4>@ControllerAdvice</h4>Shared for MVC controllers.</div>
+            <div class="card"><h4>@RestControllerAdvice</h4>Best choice for JSON APIs.</div>
+            <div class="card"><h4>ResponseEntityExceptionHandler</h4>Extends common default exception handling.</div>
+          </div>
+        </section>
+
+        <section class="section" id="data">
+          <div class="section-head"><h2>19 · Spring Data</h2><span class="badge d">repositories & JDBC</span></div>
+          <div class="grid2">
+            <div class="card"><h4>Spring JDBC</h4>Low-level template abstraction over JDBC.</div>
+            <div class="card"><h4>JdbcTemplate</h4>Used for direct SQL and persistent operations when you want control.</div>
+            <div class="card"><h4>NamedParameterJdbcTemplate</h4>More readable SQL with named parameters.</div>
+            <div class="card"><h4>Spring Data JPA</h4>Repository abstraction with query derivation, paging, sorting, and custom query support.</div>
+          </div>
+          <pre><code>public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    Optional<Customer> findByEmail(String email);
+}</code></pre>
+          <p>Spring Data hides much of the boilerplate but still relies on JPA/Hibernate for object mapping. For complex queries, prefer repository methods, `@Query`, projections, and query DSLs; use raw SQL only where required for performance or database-specific behavior.</p>
+        </section>
+
+        <section class="section" id="jpa">
+          <div class="section-head"><h2>20 · JPA / Hibernate</h2><span class="badge arc">deep dive</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Entity] --> B[Persistence Context]
+            B --> C[First-Level Cache]
+            C --> D[Dirty Checking]
+            D --> E[Flush]
+            E --> F[Commit]
+            F --> G[Database]
+          </div>
+          <p>JPA manages persistence with entities, an EntityManager, and a persistence context. Hibernate is the implementation used by most Spring Data JPA setups.</p>
+          <div class="grid2">
+            <div class="card"><h4>Entity</h4>Mapped Java class representing a database table.</div>
+            <div class="card"><h4>EntityManager</h4>Interface for persistence operations.</div>
+            <div class="card"><h4>Persistence context</h4>A first-level cache containing managed entities.</div>
+            <div class="card"><h4>Dirty checking</h4>Hibernate detects changes to managed entities before flush.</div>
+            <div class="card"><h4>Flush</h4>Synchronize persistence context state with database</div>
+            <div class="card"><h4>Commit</h4>Finalize transaction and flush if needed</div>
+          </div>
+          <p>Entity lifecycle is transient → managed → detached → removed. Lazy loading means a relation is loaded only when accessed, while eager loading prefetches it; both have trade-offs for performance and risk of N+1 issues.</p>
+        </section>
+
+        <section class="section" id="relationships">
+          <div class="section-head"><h2>21 · JPA Relationships</h2><span class="badge d">entity design</span></div>
+          <table>
+            <tr><th>Relationship</th><th>Meaning</th><th>Common issues</th></tr>
+            <tr><td>@OneToOne</td><td>Single record to single record</td><td>Unnecessary eager fetch; ownership confusion</td></tr>
+            <tr><td>@OneToMany</td><td>Parent to many children</td><td>N+1, oversized collections, cascade misuse</td></tr>
+            <tr><td>@ManyToOne</td><td>Many children to single parent</td><td>Lazy loading causing N+1 if accessed poorly</td></tr>
+            <tr><td>@ManyToMany</td><td>Many-to-many join table</td><td>Hard to model and manage; usually should be factored</td></tr>
+          </table>
+          <p>The owning side controls the foreign key. `mappedBy` indicates the inverse side. `cascade` propagates persistence operations; `orphanRemoval` removes child rows when the relationship is severed. Fetch strategies matter: eager usually causes unnecessary data reads while lazy may cause N+1 if not planned carefully.</p>
+          <div class="callout red"><b>N+1 problem</b>Common when a parent list is loaded and then each child is lazily loaded separately. Fix by `JOIN FETCH`, `EntityGraph`, batch fetching, fetch joins, or DTO projections.</div>
+          <pre><code>@Entity
+public class Order {
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+}
+
+@Entity
+public class OrderItem {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+}</code></pre>
+        </section>
+
+        <section class="section" id="db-performance">
+          <div class="section-head"><h2>22 · Database Transactions and Performance</h2><span class="badge d">production data layer</span></div>
+          <div class="grid2">
+            <div class="card"><h4>Connection pooling</h4>HikariCP is the default in Spring Boot for efficient DB connection management.</div>
+            <div class="card"><h4>Indexes</h4>Proper indexes reduce scan cost and support joins and sorting.</div>
+            <div class="card"><h4>Pagination</h4>Never fetch all rows into memory if they are large.</div>
+            <div class="card"><h4>Optimistic locking</h4>Version columns; excellent for low contention.</div>
+            <div class="card"><h4>Pessimistic locking</h4>Explicit row locks; use carefully under high contention.</div>
+            <div class="card"><h4>Query tuning</h4>Use explain plans, avoid `SELECT *`, filter early, join appropriately.</div>
+          </div>
+          <p>Connection pool sizing is not arbitrary. It is based on DB capacity, query latency, number of threads, and expected concurrency. Underprovisioning means queueing and timeouts; overprovisioning causes lock contention and DB pressure.</p>
+          <pre><code>spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=10
+spring.datasource.hikari.connection-timeout=30000</code></pre>
+        </section>
+
+        <section class="section" id="boot">
+          <div class="section-head"><h2>23 · Spring Boot</h2><span class="badge f">opinionated framework</span></div>
+          <p>Spring Boot removes much of the boilerplate and configuration friction. It provides opinionated defaults, dependency management, starter packages, embedded servers, health endpoints, auto-configuration, and a faster developer experience.</p>
+          <pre><code>@SpringBootApplication
+public class PaymentServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentServiceApplication.class, args);
+    }
+}</code></pre>
+          <p>It is built on top of the Spring Framework but adds a runtime startup path. `@SpringBootApplication` is equivalent to three pieces:</p>
+          <pre><code>@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>@SpringBootConfiguration</h4>Marks the class as the application configuration entry point.</div>
+            <div class="card"><h4>@EnableAutoConfiguration</h4>Loads auto-config classes based on classpath, beans, and conditions.</div>
+            <div class="card"><h4>@ComponentScan</h4>Registers application beans under the package root.</div>
+            <div class="card"><h4>Embedded server</h4>Tomcat/Jetty/Undertow embedded by default for convenience.</div>
+          </div>
+        </section>
+
+        <section class="section" id="auto-config">
+          <div class="section-head"><h2>24 · Auto-configuration</h2><span class="badge d">Spring Boot internals</span></div>
+          <p>Auto-configuration decides which beans should exist based on classpath, environment, conditional classes, and user beans. It is one of the reasons Spring Boot feels magical without being opaque.</p>
+          <pre><code>@Configuration
+@ConditionalOnClass(DataSource.class)
+@ConditionalOnProperty(name = "spring.datasource.url")
+class DataSourceAutoConfiguration {}</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>@ConditionalOnClass</h4>Only create bean if a class exists on the classpath.</div>
+            <div class="card"><h4>@ConditionalOnMissingBean</h4>Only create if the user did not define a bean.</div>
+            <div class="card"><h4>@ConditionalOnProperty</h4>Only create if configuration property conditions match.</div>
+            <div class="card"><h4>@ConditionalOnBean</h4>Only create if a bean of a type already exists.</div>
+          </div>
+          <p>Auto-config import is based on `AutoConfigurationImportSelector` and metadata generated by Spring Boot itself. This is why adding `spring-boot-starter-web` brings in MVC, Jackson, Tomcat, validation, and serving support without manually specifying a lot of dependencies.</p>
+        </section>
+
+        <section class="section" id="starters">
+          <div class="section-head"><h2>25 · Spring Boot Starters</h2><span class="badge d">dependency management</span></div>
+          <table>
+            <tr><th>Starter</th><th>Purpose</th></tr>
+            <tr><td>spring-boot-starter-web</td><td>Web MVC, Tomcat, Jackson, validation, starters</td></tr>
+            <tr><td>spring-boot-starter-data-jpa</td><td>JPA, Hibernate, Spring Data</td></tr>
+            <tr><td>spring-boot-starter-security</td><td>Security primitives, filters, defaults</td></tr>
+            <tr><td>spring-boot-starter-validation</td><td>Jakarta Validation / Bean Validation</td></tr>
+            <tr><td>spring-boot-starter-actuator</td><td>Health/metrics endpoints</td></tr>
+            <tr><td>spring-boot-starter-test</td><td>JUnit, Mockito, Spring Test</td></tr>
+          </table>
+          <p>Starters coordinate dependency management and BOMs. They help avoid version mismatch. In enterprise build systems, parent POMs and BOMs are often standardized across many services. Manually specifying versions is a common source of fragile builds and surprising transitive conflicts.</p>
+        </section>
+
+        <section class="section" id="maven-gradle">
+          <div class="section-head"><h2>26 · Maven + Gradle</h2><span class="badge d">build systems</span></div>
+          <pre><code>&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;3.5.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;</code></pre>
+          <p>In Maven, `dependencyManagement` is about controlling versions. `dependencies` declares actual library usage. In large enterprise systems, a parent POM or BOM is standard to align versions across dozens of services and modules. Gradle provides equivalent capabilities via version catalogs and platform BOMs.</p>
+          <div class="callout"><b>Maven vs Gradle</b>Maven is conventional and predictable; Gradle is more flexible and powerful. Most enterprise Spring teams are comfortable with either. The key is consistency, reproducibility, and dependency discipline.</div>
+        </section>
+
+        <section class="section" id="boot-config">
+          <div class="section-head"><h2>28 · Spring Boot Configuration</h2><span class="badge d">configuration precedence</span></div>
+          <p>Spring Boot configuration is layered and environment-aware. The effective configuration is based on precedence between files, environment variables, and JVM args. Production defaults should be centralized and secret values should never live in Git.</p>
+          <pre><code># application-local.yml
+server:
+  port: 8081
+
+# application-dev.yml
+server:
+  port: 8082
+
+# application-prod.yml
+server:
+  port: 80</code></pre>
+          <div class="callout purple"><b>Precedence hierarchy</b>Command line args → OS environment variables → application-{profile}.properties|yml → application.properties|yml → defaults bundled in libraries.</div>
+        </section>
+
+        <section class="section" id="logging">
+          <div class="section-head"><h2>29 · Logging</h2><span class="badge d">SLF4J + Logback</span></div>
+          <p>Use SLF4J for logging API and Logback as the implementation. Never log secrets, tokens, or full customer data. Structured logging and correlation IDs are key in distributed systems.</p>
+          <table>
+            <tr><th>Level</th><th>Use</th></tr>
+            <tr><td>TRACE</td><td>Highly detailed diagnostic information</td></tr>
+            <tr><td>DEBUG</td><td>Detailed application flow</td></tr>
+            <tr><td>INFO</td><td>Operational milestones</td></tr>
+            <tr><td>WARN</td><td>Suspicious but recoverable conditions</td></tr>
+            <tr><td>ERROR</td><td>Failures requiring attention</td></tr>
+          </table>
+          <pre><code>private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+log.info("Processing order {} for customer {}", orderId, customerId);</code></pre>
+          <div class="callout green"><b>Production</b>Use MDC (Mapped Diagnostic Context) for request IDs, correlation IDs, user IDs, and trace IDs. Log as JSON for indexing in ELK, Splunk, or OpenSearch.</div>
+        </section>
+
+        <section class="section" id="security">
+          <div class="section-head"><h2>30 · Spring Security</h2><span class="badge arc">major section</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[HTTP Request] --> B[Security Filters]
+            B --> C[Authentication]
+            C --> D[SecurityContext]
+            D --> E[Authorization]
+            E --> F[Controller]
+          </div>
+          <p>Spring Security handles authentication and authorization. A security filter chain sits in front of the application, evaluating credentials, building an `Authentication` object, populating the `SecurityContext`, and checking authorization rules.</p>
+          <div class="grid2">
+            <div class="card"><h4>Authentication</h4>Who are you?</div>
+            <div class="card"><h4>Authorization</h4>What are you allowed to do?</div>
+            <div class="card"><h4>SecurityFilterChain</h4>Order of filters and rules.</div>
+            <div class="card"><h4>AuthenticationManager</h4>Responsible for authentication flow.</div>
+            <div class="card"><h4>AuthenticationProvider</h4>Validates credentials and returns an Authentication object.</div>
+            <div class="card"><h4>UserDetailsService</h4>Loads user information.</div>
+          </div>
+          <pre><code>@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/public/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .anyRequest().authenticated())
+        .httpBasic(Customizer.withDefaults())
+        .build();
+}</code></pre>
+        </section>
+
+        <section class="section" id="jwt">
+          <div class="section-head"><h2>31 · JWT</h2><span class="badge d">token-based auth</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[Client] --> B[Login Request]
+            B --> C[Auth Server]
+            C --> D[Access Token + Refresh Token]
+            D --> E[API Request]
+            E --> F[Resource Server]
+            F --> G[JWT Validation]
+          </div>
+          <p>JWTs are stateless tokens containing claims signed with a secret or key pair. They are commonly used for API-to-API and user-sessionless auth, but they must be used carefully due to theft, expiration, and revocation challenges.</p>
+          <div class="grid2">
+            <div class="card"><h4>Access token</h4>Short-lived token for API access.</div>
+            <div class="card"><h4>Refresh token</h4>Long-lived token to obtain new access tokens.</div>
+            <div class="card"><h4>Claims</h4>Sub, exp, roles, aud, iss.</div>
+            <div class="card"><h4>Validation</h4>Signature verification, expiration, audience, issuer, scope checks.</div>
+          </div>
+          <pre><code>{
+  "sub": "123",
+  "scope": "read:account write:account",
+  "role": "USER",
+  "exp": 1712345678
+}</code></pre>
+          <div class="callout red"><b>Security risks</b>Token theft, refresh token leakage, poor rotation, blind trust of tokens, missing HTTPS, missing key rotation plan, and bypassing CORS/CSRF rules correctly.</div>
+        </section>
+
+        <section class="section" id="oauth">
+          <div class="section-head"><h2>32 · OAuth2 and OIDC</h2><span class="badge d">enterprise identity</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[User] --> B[Client]
+            B --> C[Authorization Server]
+            C --> D[Authorization Code]
+            D --> E[Access Token]
+            E --> F[Resource Server]
+            C --> G[ID Token]
+          </div>
+          <p>OAuth2 is authorization. OIDC adds identity information and an ID token. In modern enterprise systems, OAuth2/OIDC is used with Keycloak, Auth0, Azure AD, Okta, or custom IdPs. Use them for external integrations and user identity rather than inventing custom token protocols.</p>
+          <div class="callout"><b>Common enterprise flow</b>User authenticates with a provider; app receives an authorization code; token endpoint returns ID token and access token; API validates access token; user identity available via token claims.</div>
+        </section>
+
+        <section class="section" id="testing">
+          <div class="section-head"><h2>33 · Spring Testing</h2><span class="badge f">test pyramid</span></div>
+          <p>Testing strategy should match the architecture: unit tests for isolated logic, integration tests for Spring wiring, contract tests for API boundaries, and component tests for realistic app flows. Modern Spring Boot favors JUnit 5 + Mockito + Spring Test + Testcontainers.</p>
+          <div class="grid2">
+            <div class="card"><h4>JUnit</h4>Unit and integration tests.</div>
+            <div class="card"><h4>Mockito</h4>Mocking collaborators.</div>
+            <div class="card"><h4>@SpringBootTest</h4>Full application context startup.</div>
+            <div class="card"><h4>@WebMvcTest</h4>Controller slice test.</div>
+            <div class="card"><h4>@DataJpaTest</h4>Repository slice test.</div>
+            <div class="card"><h4>MockMvc / WebTestClient</h4>HTTP layer testing.</div>
+          </div>
+          <pre><code>@SpringBootTest
+class OrderServiceIT {
+    @Autowired OrderService orderService;
+
+    @Test
+    void shouldCreateOrder() {
+        // given
+        // when
+        // then
+    }
+}</code></pre>
+        </section>
+
+        <section class="section" id="actuator">
+          <div class="section-head"><h2>34 · Spring Actuator</h2><span class="badge d">production diagnostics</span></div>
+          <p>Actuator exposes health, metrics, environment, threading, logs, and bean information. It is a production-grade operational control plane for Spring Boot apps.</p>
+          <pre><code>management.endpoints.web.exposure.include=health,info,metrics,prometheus
+management.endpoint.health.probes.enabled=true
+management.health.livenessstate.enabled=true
+management.health.readinessstate.enabled=true</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>health</h4>Service status</div>
+            <div class="card"><h4>metrics</h4>CPU, memory, HTTP, DB metrics</div>
+            <div class="card"><h4>loggers</h4>Dynamic logging configuration</div>
+            <div class="card"><h4>env</h4>Resolved environment values</div>
+            <div class="card"><h4>mappings</h4>Interesting endpoints and routes</div>
+            <div class="card"><h4>prometheus</h4>Scraping for Prometheus</div>
+          </div>
+          <div class="callout amber"><b>Production considerations</b>Do not expose all Actuator endpoints publicly by default. Restrict endpoints, use authentication, and consider how much internal info is available externally.</div>
+        </section>
+
+        <section class="section" id="observability">
+          <div class="section-head"><h2>35 · Observability</h2><span class="badge d">logs metrics traces</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[Microservice A] --> B[Microservice B]
+            B --> C[Microservice C]
+            A -. traces .-> D[OpenTelemetry]
+            B -. traces .-> D
+            C -. traces .-> D
+            D --> E[Prometheus / Grafana]
+          </div>
+          <p>Modern production operations require logs, metrics, and traces together. Micrometer exposes metrics from Spring Boot; OpenTelemetry adds standardized instrumentation for traces and metrics. Correlation IDs and request IDs make distributed debugging manageable.</p>
+          <div class="grid2">
+            <div class="card"><h4>Logs</h4>Context-rich operational records.</div>
+            <div class="card"><h4>Metrics</h4>Count, latency, rate, gauge, histogram.</div>
+            <div class="card"><h4>Traces</h4>End-to-end request flow across service boundaries.</div>
+            <div class="card"><h4>Correlation ID</h4>Links logs from one request across services.</div>
+          </div>
+        </section>
+
+        <section class="section" id="cache">
+          <div class="section-head"><h2>36 · Cache</h2><span class="badge d">Redis, Caffeine</span></div>
+          <p>Caching reduces repeated expensive reads by storing computed or database-derived results in memory or a fast data store. In production, caching improves throughput but introduces consistency risks and invalidation complexity.</p>
+          <pre><code>@Cacheable("customers")
+public Customer getCustomer(Long id) {
+    return customerRepository.findById(id).orElseThrow();
+}</code></pre>
+          <div class="grid2">
+            <div class="card"><h4>@Cacheable</h4>Cache result of method call.</div>
+            <div class="card"><h4>@CachePut</h4>Update cache with fresh result.</div>
+            <div class="card"><h4>@CacheEvict</h4>Remove stale entries.</div>
+            <div class="card"><h4>Redis / Caffeine</h4>Used depending on need for distributed or local caching.</div>
+          </div>
+          <div class="callout amber"><b>Consistency challenge</b>Cache invalidation is often more important than caching itself. Cache-aside patterns, TTLs, stale-while-revalidate, and event-driven invalidation exist to balance freshness and performance.</div>
+        </section>
+
+        <section class="section" id="async">
+          <div class="section-head"><h2>37 · Asynchronous Processing</h2><span class="badge d">@Async / executors</span></div>
+          <p>Handle background work and non-blocking operations using `@Async`, thread pools, `CompletableFuture`, and schedulers. This is common for email, notifications, report generation, and asynchronous workflows.</p>
+          <pre><code>@EnableAsync
+@Configuration
+class AsyncConfig {
+    @Bean
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(8);
+        executor.setMaxPoolSize(32);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("payment-");
+        executor.initialize();
+        return executor;
+    }
+}</code></pre>
+          <div class="callout"><b>Production</b>Thread pool sizing should consider CPU, queue length, request latency, and downstream dependencies. Oversized pools can hide inefficiency; undersized pools cause pile-ups and timeouts.</div>
+        </section>
+
+        <section class="section" id="webflux">
+          <div class="section-head"><h2>38 · Spring WebFlux</h2><span class="badge d">reactive stack</span></div>
+          <p>Spring WebFlux is the reactive web stack that supports non-blocking I/O. It offers `Mono` and `Flux` and can be a good fit for high-concurrency I/O-bound systems. But it is not a universal replacement for MVC.</p>
+          <div class="grid2">
+            <div class="card"><h4>Spring MVC</h4>Servlet-based, thread-per-request, blocking model.</div>
+            <div class="card"><h4>WebFlux</h4>Reactive, non-blocking, event-driven model.</div>
+            <div class="card"><h4>Mono</h4>Zero or one element.</div>
+            <div class="card"><h4>Flux</h4>Zero to many elements.</div>
+          </div>
+          <p>Use WebFlux when workflows are inherently non-blocking, highly concurrent, and based on event streams or asynchronous data processing. Do not use it just because it feels modern; blocking database calls or blocking `RestTemplate` inside reactive flow defeats the point.</p>
+        </section>
+
+        <section class="section" id="microservices">
+          <div class="section-head"><h2>39 · Spring Microservices</h2><span class="badge f">enterprise service design</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[API Gateway] --> B[Customer Service]
+            A --> C[Order Service]
+            A --> D[Payment Service]
+            B --> E[Customer DB]
+            C --> F[Order DB]
+            D --> G[Payment DB]
+          </div>
+          <p>Microservices split business capabilities into independently deployable services. They require service discovery, configuration management, network resilience, observability, and clear ownership boundaries. They are chosen to reduce blast radius and improve team autonomy, not because they are “more fashionable”.</p>
+          <div class="callout green"><b>When microservices make sense</b>Multiple streams of work, independent scaling, different teams, complex domain boundaries, and the ability to operate the platform with maturity.</div>
+          <div class="callout red"><b>When they do not</b>Small team, unclear domain ownership, limited infrastructure maturity, or when a modular monolith would solve the problem simpler and with less operational risk.</div>
+        </section>
+
+        <section class="section" id="spring-cloud">
+          <div class="section-head"><h2>40 · Spring Cloud</h2><span class="badge d">distributed platform</span></div>
+          <p>Spring Cloud offers integration with distributed systems concerns: configuration, discovery, load balancing, gateway, resiliency, and service-to-service communication. Use it intentionally; not every old Spring Cloud pattern is appropriate for modern architectures.</p>
+          <table>
+            <tr><th>Component</th><th>Purpose</th><th>Use with caution</th></tr>
+            <tr><td>Config Server</td><td>Centralize config</td><td>Prefer managed cloud config in some ecosystems</td></tr>
+            <tr><td>Gateway</td><td>API routing, filtering, auth</td><td>Use if you need a mesh of services</td></tr>
+            <tr><td>Service Discovery</td><td>Locate services</td><td>Use in K8s with native service discovery</td></tr>
+            <tr><td>OpenFeign</td><td>Declarative REST clients</td><td>Need good circuit breaking and timeouts</td></tr>
+            <tr><td>Resilience4j</td><td>Retries, circuit breakers, rate limits</td><td>Prefer healthy defaults and careful testing</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="kafka">
+          <div class="section-head"><h2>41 · Kafka + Spring</h2><span class="badge d">event streaming</span></div>
+          <div class="mermaid">
+            flowchart LR
+            A[Producer] --> B[Kafka Topic]
+            B --> C[Consumer]
+            C --> D[Database]
+          </div>
+          <p>Kafka is used for high-throughput event streaming and decoupling between services. It is not a database, and it should not replace synchronous API contracts for user-facing operations. It is best used for asynchronous processing, auditing, notifications, and event propagation.</p>
+          <div class="grid2">
+            <div class="card"><h4>Producer</h4>Sends record to topic.</div>
+            <div class="card"><h4>Consumer</h4>Reads records and processes them.</div>
+            <div class="card"><h4>Partitions</h4>Parallelize message processing.</div>
+            <div class="card"><h4>Offsets</h4>Track where a consumer is in a partition.</div>
+            <div class="card"><h4>Dead-letter topic</h4>Stores poison messages for replay/debugging.</div>
+            <div class="card"><h4>Exactly-once</h4>Powerful but not free; requires careful transactional producer/consumer setup.</div>
+          </div>
+          <pre><code>@KafkaListener(topics = "payment-events")
+public void onPaymentEvent(PaymentEvent event) {
+    paymentAuditService.record(event);
+}</code></pre>
+        </section>
+
+        <section class="section" id="eda">
+          <div class="section-head"><h2>42 · Event-Driven Architecture</h2><span class="badge d">async patterns</span></div>
+          <p>Event-driven systems separate commands from events and explicitly model eventual consistency. They are powerful for scaling and decoupling but require a new set of operational patterns: idempotency, outbox, compensation, and replay.</p>
+          <div class="grid2">
+            <div class="card"><h4>Commands</h4>Requests to do something now.</div>
+            <div class="card"><h4>Events</h4>Facts that happened.</div>
+            <div class="card"><h4>Outbox pattern</h4>Write event to DB and relay it reliably.</div>
+            <div class="card"><h4>Saga pattern</h4>Coordinate distributed business transactions.</div>
+            <div class="card"><h4>CQRS</h4>Separate commands and queries.</div>
+            <div class="card"><h4>Event sourcing</h4>Persist the sequence of domain events.</div>
+          </div>
+        </section>
+
+        <section class="section" id="resilience">
+          <div class="section-head"><h2>43 · Resilience</h2><span class="badge d">timeouts, retries, circuit breakers</span></div>
+          <p>Resilience is how an application behaves under failure. Without timeouts, retries, circuit breakers, and bulkheads, a single slow downstream dependency can cascade through the system.</p>
+          <div class="grid2">
+            <div class="card"><h4>Timeout</h4>Bound how long a call can wait.</div>
+            <div class="card"><h4>Retry</h4>Attempt again on transient failures.</div>
+            <div class="card"><h4>Circuit breaker</h4>Stop calling a failing dependency.</div>
+            <div class="card"><h4>Bulkhead</h4>Isolate pools for different workloads.</div>
+            <div class="card"><h4>Rate limiting</h4>Prevent overload.</div>
+            <div class="card"><h4>Fallback</h4>Graceful degraded behavior.</div>
+          </div>
+          <div class="callout red"><b>Retry without timeout is dangerous</b>If you retry indefinitely with no timeout, you may create a thundering herd or lock threads while a downstream system is recovering. Pair retry with bounded timeout, jitter, and backoff.</div>
+        </section>
+
+        <section class="section" id="performance">
+          <div class="section-head"><h2>44 · Performance Engineering</h2><span class="badge d">bottleneck analysis</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Request] --> B[API Gateway]
+            B --> C[Service]
+            C --> D[Database]
+          </div>
+          <p>Performance problems are layered: network, gateway, service CPU, garbage collection, thread contention, database latency, and client behavior. Diagnose by looking at metrics, logs, traces, thread dumps, heap dumps, and DB explain plans.</p>
+          <div class="callout"><b>Common bottlenecks</b>Blocking I/O, huge object allocations, memory leaks, poor SQL, missing indexes, too many DB connections, low thread pool capacity, N+1 queries, and cache misses on popular hot paths.</div>
+        </section>
+
+        <section class="section" id="startup-internals">
+          <div class="section-head"><h2>45 · What Really Happens When Spring Boot Starts?</h2><span class="badge arc">internals</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[main()] --> B[SpringApplication.run()]
+            B --> C[Environment]
+            C --> D[ApplicationContext]
+            D --> E[Bean Definitions]
+            E --> F[Auto Configuration]
+            F --> G[Component Scan]
+            G --> H[Bean Creation]
+            H --> I[Dependency Injection]
+            I --> J[Post Processors]
+            J --> K[Embedded Server]
+            K --> L[Application Ready]
+          </div>
+          <p>Spring Boot bootstraps the environment, reads configuration, creates an application context, registers configuration classes, applies auto-config, scans components, creates beans, resolves dependencies, runs post-processors, starts the embedded server, and publishes application-ready events. This is the real start path behind the magic.</p>
+        </section>
+
+        <section class="section" id="request-flow">
+          <div class="section-head"><h2>46 · Request Internal Flow</h2><span class="badge d">inside a REST request</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Browser] --> B[Load Balancer]
+            B --> C[Tomcat]
+            C --> D[Servlet]
+            D --> E[DispatcherServlet]
+            E --> F[HandlerMapping]
+            F --> G[Controller]
+            G --> H[Service]
+            H --> I[Repository]
+            I --> J[Hibernate]
+            J --> K[JDBC]
+            K --> L[Database]
+          </div>
+          <p>A request enters through a load balancer, hits the embedded Tomcat server, enters the servlet container, is routed into the DispatcherServlet, matched to a controller, executed by the application logic, persisted through JPA/Hibernate, and the response is serialized back to the client.</p>
+        </section>
+
+        <section class="section" id="architecture-patterns">
+          <div class="section-head"><h2>47 · Architecture Patterns</h2><span class="badge d">choose the right shape</span></div>
+          <div class="grid2">
+            <div class="card"><h4>Layered Architecture</h4>Presentation → Service → Persistence. Simple, common.</div>
+            <div class="card"><h4>Hexagonal Architecture</h4>Core business logic isolated from external concerns.</div>
+            <div class="card"><h4>Clean Architecture</h4>Dependency direction from outer layers toward inner domain.</div>
+            <div class="card"><h4>Onion Architecture</h4>Domain core in the middle, infrastructure on the edges.</div>
+            <div class="card"><h4>Modular Monolith</h4>Single codebase with internal boundaries.</div>
+            <div class="card"><h4>Microservices</h4>Independent deployable services with distributed systems complexity.</div>
+          </div>
+          <div class="callout"><b>When to choose modular monolith</b>When the team is small, the domain is still maturing, or the operational complexity of full microservices would exceed the value. A modular monolith is an excellent first step to enforce boundaries before distributed systems.</div>
+        </section>
+
+        <section class="section" id="design-patterns">
+          <div class="section-head"><h2>48 · Design Patterns with Spring</h2><span class="badge d">real-world usage</span></div>
+          <table>
+            <tr><th>Pattern</th><th>Spring usage</th><th>Interview angle</th></tr>
+            <tr><td>Singleton</td><td>Spring-managed bean scope default singleton</td><td>Spring singleton is not Java singleton</td></tr>
+            <tr><td>Factory</td><td>`BeanFactory`, `ApplicationContext`, `@Bean` methods</td><td>Object creation delegated</td></tr>
+            <tr><td>Strategy</td><td>Multiple implementations behind interfaces</td><td>Use with `@Qualifier` and `@Primary`</td></tr>
+            <tr><td>Template Method</td><td>JdbcTemplate, RestTemplate / WebClient patterns</td><td>Common in infrastructure templates</td></tr>
+            <tr><td>Proxy</td><td>AOP, transactions, security</td><td>Fundamental to Spring internals</td></tr>
+            <tr><td>Observer</td><td>Application events</td><td>Loose coupling through publish/subscribe</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="production-architecture">
+          <div class="section-head"><h2>49 · Production Architecture</h2><span class="badge f">enterprise platform</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Internet] --> B[CDN / WAF]
+            B --> C[Load Balancer]
+            C --> D[API Gateway]
+            D --> E[Spring Boot Services]
+            E --> F[Kafka]
+            E --> G[Databases]
+            E --> H[Redis]
+            E --> I[Observability]
+          </div>
+          <p>Modern Spring production platforms are multi-layer systems: traffic enters through WAF/CDN, load balancing, API gateways, stateless application services, Kafka, databases, Redis, and observability backends. This is the platform view of Spring in production.</p>
+          <div class="grid2">
+            <div class="card"><h4>Kubernetes</h4>Runs containers and orchestrates deployment, scaling, rollouts.</div>
+            <div class="card"><h4>Docker</h4>Build and package services consistently.</div>
+            <div class="card"><h4>AWS / cloud</h4>Managed data and networking layers.</div>
+            <div class="card"><h4>CI/CD</h4>Automated build, test, promotion, deployment.</div>
+          </div>
+        </section>
+
+        <section class="section" id="cloud-native">
+          <div class="section-head"><h2>50 · Cloud-Native Spring</h2><span class="badge d">Kubernetes / AWS / Docker</span></div>
+          <p>Cloud-native Spring applications are designed for containerized deployment with health checks, readiness/liveness probes, graceful shutdown, limited resources, autoscaling, and externalized configuration. They treat infrastructure as dynamic and ephemeral.</p>
+          <div class="grid2">
+            <div class="card"><h4>Readiness</h4>Ready to receive traffic.</div>
+            <div class="card"><h4>Liveness</h4>Is the process alive and healthy enough to continue?</div>
+            <div class="card"><h4>Graceful shutdown</h4>Stop accepting new requests before process exit.</div>
+            <div class="card"><h4>Secrets</h4>Do not mount into image; use vault, K8s secret, cloud secret managers.</div>
+          </div>
+        </section>
+
+        <section class="section" id="native-aot">
+          <div class="section-head"><h2>51 · Native Image / AOT</h2><span class="badge d">performance & startup</span></div>
+          <p>Spring Boot supports AOT processing and native-image deployment with GraalVM. Native images can reduce startup time and memory footprint, but they require additional care with reflection, libraries, and runtime behavior. They are valuable for serverless, edge, and time-sensitive deployment models.</p>
+          <table>
+            <tr><th>Model</th><th>Strength</th><th>Trade-off</th></tr>
+            <tr><td>JVM</td><td>Flexible, mature, easier debugging</td><td>Higher startup, more memory overhead</td></tr>
+            <tr><td>Native Image</td><td>Fast startup, lower memory</td><td>Requires reflection analysis and less dynamic runtime flexibility</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="security-best-practices">
+          <div class="section-head"><h2>52 · Security Best Practices</h2><span class="badge d">checklist</span></div>
+          <ul class="checklist">
+            <li>Use HTTPS everywhere, including internal services where possible.</li>
+            <li>Use strong hashing for passwords with BCrypt or Argon2.</li>
+            <li>Implement least privilege RBAC and scoped auth tokens.</li>
+            <li>Validate and sanitize all inputs to prevent SQL injection and XSS.</li>
+            <li>Configure CORS and CSRF correctly for the type of app.</li>
+            <li>Use secure headers and CSP where applicable.</li>
+            <li>Rotate secrets and API keys; never commit them to Git.</li>
+            <li>Apply rate limiting and API gateways for abuse protection.</li>
+            <li>Track audit logs for admin and payment operations.</li>
+            <li>Keep dependencies patched and run vulnerability scanning.</li>
+          </ul>
+        </section>
+
+        <section class="section" id="production-config">
+          <div class="section-head"><h2>53 · Production Configuration</h2><span class="badge d">secret management</span></div>
+          <p>Production configuration must be environment-specific, secret-safe, and deterministic. Never commit database credentials, JWT secrets, API keys, certificates, or cloud credentials to Git. Use environment variables, secret stores, or Kubernetes secrets. This is not optional in serious systems.</p>
+          <div class="grid2">
+            <div class="card"><h4>Local</h4>`application-local.yml`</div>
+            <div class="card"><h4>Development</h4>`application-dev.yml`</div>
+            <div class="card"><h4>Production</h4>`application-prod.yml`</div>
+            <div class="card"><h4>Secrets</h4>Managed by external secret stores</div>
+          </div>
+        </section>
+
+        <section class="section" id="real-project">
+          <div class="section-head"><h2>54 · Complete Real-World Project</h2><span class="badge arc">banking / payment platform</span></div>
+          <p>Enterprise banking and payment platforms are the natural place to apply Spring Boot at scale. The services may include API Gateway, Customer Service, Account Service, Transaction Service, Payment Service, Fraud Service, Notification Service, and Reporting Service. They rely on REST APIs, Kafka, Oracle, Redis, OAuth2/JWT, Docker, and Kubernetes.</p>
+          <div class="mermaid">
+            graph TD
+            A[API Gateway] --> B[Customer Service]
+            A --> C[Account Service]
+            A --> D[Transaction Service]
+            A --> E[Payment Service]
+            E --> F[Fraud Service]
+            E --> G[Notification Service]
+            G --> H[Reporting Service]
+            E --> I[Kafka]
+            B --> J[Oracle]
+            C --> J
+            D --> J
+            E --> K[Redis]
+          </div>
+          <p>The architecture should reflect bounded contexts, event-driven notifications, strong security, secrets management, and real operational resilience. Each microservice should own its data store, implement a small set of capabilities, and expose stable APIs with strong observability.</p>
+        </section>
+
+        <section class="section" id="code-quality">
+          <div class="section-head"><h2>55 · Code Quality</h2><span class="badge f">production code</span></div>
+          <p>Every example should aim for clean code, SOLID principles, meaningful naming, proper exceptions, validation, logging, and separation of concerns. In production, code quality is not just style; it is a direct risk management measure.</p>
+          <ul class="checklist">
+            <li>Use constructor injection for required collaborators.</li>
+            <li>Do not expose JPA entities directly in REST payloads.</li>
+            <li>Keep service classes focused and cohesive.</li>
+            <li>Separate infrastructure code from domain logic.</li>
+            <li>Do not hide failures by swallowing exceptions.</li>
+            <li>Use DTOs and explicit mapping layers.</li>
+            <li>Log with context and avoid sensitive output.</li>
+            <li>Write tests that protect critical business behavior.</li>
+          </ul>
+        </section>
+
+        <section class="section" id="common-mistakes">
+          <div class="section-head"><h2>56 · Top Spring Mistakes</h2><span class="badge x">anti-patterns</span></div>
+          <ul class="checklist">
+            <li>Using field injection in production.</li>
+            <li>Creating huge service classes with too many responsibilities.</li>
+            <li>Overusing `@Transactional` and mixing transaction boundaries.</li>
+            <li>Ignoring N+1 JPA problems.</li>
+            <li>Returning JPA entities directly from APIs.</li>
+            <li>Exposing database schema in APIs.</li>
+            <li>Hardcoding secrets into config files.</li>
+            <li>Not securing Actuator endpoints.</li>
+            <li>Using retries without timeouts and backoff.</li>
+            <li>Using microservices before the team is ready.</li>
+          </ul>
+          <p>Most production incidents are not a single bug; they are a collection of small mistakes compounded by poor boundaries, missing observability, and weak operational defaults.</p>
+        </section>
+
+        <section class="section" id="interview-prep">
+          <div class="section-head"><h2>57 · Interview Preparation</h2><span class="badge d">questions by level</span></div>
+          <div class="qa open">
+            <div class="qa-q"><span>What is IoC and how is it different from DI?</span><span class="qn">Q1</span></div>
+            <div class="qa-a"><p>IoC is the inversion of control of object creation and lifecycle. Dependency injection is a specific way to implement IoC by supplying dependencies from the outside. In Spring, the container is responsible for creating and wiring beans while application code focuses on behavior.</p></div>
+          </div>
+          <div class="qa">
+            <div class="qa-q"><span>How does Spring create beans and inject dependencies?</span><span class="qn">Q2</span></div>
+            <div class="qa-a"><p>Spring reads configuration metadata, creates bean definitions, instantiates beans, resolves dependencies, runs lifecycle callbacks, and registers them in the application context. Constructor injection is the most explicit and preferred pattern.</p></div>
+          </div>
+          <div class="qa">
+            <div class="qa-q"><span>Why does `@Transactional` fail when called internally inside the same bean?</span><span class="qn">Q3</span></div>
+            <div class="qa-a"><p>Spring transaction behavior is implemented through proxies. Internal self-invocation bypasses the proxy, so transactional advice is not triggered. The fix is to move the transactional boundary to a different bean or call through a service boundary.</p></div>
+          </div>
+          <div class="qa">
+            <div class="qa-q"><span>What is bean scope and how does it differ from Java Singleton?</span><span class="qn">Q4</span></div>
+            <div class="qa-a"><p>Bean scope defines the lifecycle of a Spring-managed object within the container. Singletons are container-scoped; Java singleton is a class-level design pattern that enforces one instance per classloader. They are related but not the same concept.</p></div>
+          </div>
+          <div class="callout green"><b>Top architect question</b>How would you design a highly available Spring Boot platform? Answer: clear boundaries, stateless services, externalized config, retries with timeouts, observability, database-per-service, Kafka for decoupling, API gateway, proper secrets management, autoscaling, and deployment discipline.</div>
+        </section>
+
+        <section class="section" id="troubleshooting">
+          <div class="section-head"><h2>58 · Troubleshooting Playbook</h2><span class="badge d">production diagnosis</span></div>
+          <div class="grid2">
+            <div class="card"><h4>Application won't start</h4>Symptoms: context startup failure, bean creation exceptions. Diagnose with logs, stack trace, component scan, missing properties, and dependency mismatches. Fix by validating configuration, versions, dependencies, and bean classpath conditions.</div>
+            <div class="card"><h4>Bean creation error</h4>Check missing dependency, circular dependency, qualifier mismatch, and profile conditions. Review logs and use `@Primary` or explicit `@Qualifier` if needed.</div>
+            <div class="card"><h4>OutOfMemoryError</h4>Collect heap dump, analyze leak suspects, inspect GC logs, and review object retention patterns. Reduce caching, close resources, and avoid large object retention in thread locals or static collections.</div>
+            <div class="card"><h4>Slow API</h4>Check DB latency, CPU saturation, GC pauses, thread pool exhaustion, N+1 queries, and network issues. Add SQL explain plans and request tracing.</div>
+            <div class="card"><h4>Database timeout</h4>Often caused by failing connection pool or slow SQL. Check Hikari settings, pool usage, DB load, locks, indexes, and query plans.</div>
+            <div class="card"><h4>Kafka lag</h4>Inspect consumer throughput, partition count, processing time, dead-letter topics, retry loops, and stateful consumer logic.</div>
+          </div>
+        </section>
+
+        <section class="section" id="tools">
+          <div class="section-head"><h2>59 · Development Tools</h2><span class="badge d">tooling</span></div>
+          <ul class="checklist">
+            <li>IntelliJ IDEA for Spring navigation, decompilation, debugger, and refactoring.</li>
+            <li>Maven and Gradle for build/test/reproducibility.</li>
+            <li>Git for version control and code review discipline.</li>
+            <li>Docker and Docker Compose for local service stacks.</li>
+            <li>Kubernetes for orchestration and deployments.</li>
+            <li>Postman and curl for API testing.</li>
+            <li>JProfiler / VisualVM for performance analysis.</li>
+            <li>Prometheus + Grafana for metrics and dashboards.</li>
+            <li>Actuator for health and internals.</li>
+          </ul>
+        </section>
+
+        <section class="section" id="final-architecture">
+          <div class="section-head"><h2>60 · How a Principal Engineer Designs a Spring Boot Platform</h2><span class="badge arc">final architecture</span></div>
+          <div class="mermaid">
+            flowchart TD
+            A[Users] --> B[WAF]
+            B --> C[Load Balancer]
+            C --> D[API Gateway]
+            D --> E[Customer Service]
+            D --> F[Payment Service]
+            D --> G[Order Service]
+            E --> H[Kafka]
+            F --> H
+            G --> H
+            H --> I[Notification Service]
+            H --> J[Fraud Service]
+            H --> K[Reporting Service]
+            E --> L[Databases]
+            F --> L
+            G --> L
+            M[Observability] --> N[Prometheus]
+            M --> O[Grafana]
+            M --> P[Tracing]
+          </div>
+          <p>Designing a production platform is about choosing boundaries, enforcing rules, and making failure visible. We separate traffic, platform, business services, async events, and observability. Each service should be independently deployable, stateless when possible, secured, monitored, and tested. Data ownership should be explicit; event flows should be durable and idempotent; and failure should be isolated rather than allowed to cascade.</p>
+        </section>
+
+        <section class="section" id="cheats">
+          <div class="section-head"><h2>61 · Final Cheat Sheets</h2><span class="badge d">quick reference</span></div>
+          <div class="grid2">
+            <div class="card"><h4>Spring Core</h4>IoC, DI, beans, container, lifecycle, scopes, AOP, profiles, property binding, conditions.</div>
+            <div class="card"><h4>Spring Boot</h4>`@SpringBootApplication`, auto-config, starters, Boot 3+ Java 17 baseline, embedded server, configuration precedence.</div>
+            <div class="card"><h4>Spring MVC</h4>`DispatcherServlet`, handler mapping, controllers, request/response mapping, validation, exception handling.</div>
+            <div class="card"><h4>Spring Security</h4>Authentication vs authorization, filters, `SecurityFilterChain`, JWT, OAuth2/OIDC, access control.</div>
+            <div class="card"><h4>JPA</h4>Entities, persistence context, dirty checking, flush, lazy/eager, transaction boundaries, indexes.</div>
+            <div class="card"><h4>Transactions</h4>Propagation, isolation, rollback rules, read-only, timeouts, self-invocation pitfalls.</div>
+            <div class="card"><h4>Kafka + Spring</h4>Topic, consumer groups, partitions, offsets, idempotency, DLQ, event-driven design.</div>
+            <div class="card"><h4>Testing</h4>Unit, integration, web slice, repository slice, Testcontainers, mocks, contract tests.</div>
+            <div class="card"><h4>Actuator</h4>Health, metrics, mappings, prometheus, liveness/readiness.</div>
+            <div class="card"><h4>Performance</h4>Profiling, GC, pool sizing, DB plan analysis, N+1, caching, timeouts.</div>
+          </div>
+        </section>
+
+        <footer>
+          Spring & Spring Boot Masterclass · Java 21 / Spring 6/7 / Boot 3/4 · Beginner → Architect
+        </footer>
+      </main>
+    </div>
+    <button id="toTop" aria-label="Back to top">↑</button>
+    <script>
+      mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+      const themeBtn = document.getElementById('themeBtn');
+      themeBtn.addEventListener('click', function () {
+        document.body.classList.toggle('light');
+      });
+
+      const sections = [...document.querySelectorAll('.section')];
+      const navItems = [...document.querySelectorAll('.navitem')];
+      const partNow = document.getElementById('partNow');
+      const partMax = document.getElementById('partMax');
+      partMax.textContent = String(navItems.length);
+
+      function setActiveNav(id) {
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === id);
+        });
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const id = visible.target.id;
+          setActiveNav(id);
+          const targetIndex = navItems.findIndex(item => item.dataset.target === id);
+          if (targetIndex >= 0) partNow.textContent = String(targetIndex + 1).padStart(2, '0');
+        }
+      }, { threshold: [0.2, 0.5, 0.7] });
+
+      sections.forEach(section => observer.observe(section));
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const targetId = item.dataset.target;
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      const search = document.getElementById('search');
+      search.addEventListener('input', () => {
+        const query = search.value.trim().toLowerCase();
+        const textNodes = document.body.querySelectorAll('p, li, h1, h2, h3, h4, .card, .qa-a, .qa-q, table, pre, code');
+        textNodes.forEach(node => {
+          const text = (node.textContent || '').toLowerCase();
+          if (!query || text.includes(query)) {
+            node.parentElement?.classList?.remove('hidden-by-search');
+          } else {
+            node.parentElement?.classList?.add('hidden-by-search');
+          }
+        });
+      });
+
+      document.getElementById('toTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      window.addEventListener('scroll', () => {
+        const btn = document.getElementById('toTop');
+        btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+        const fill = document.getElementById('fill');
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        fill.style.width = scrollable > 0 ? `${(window.scrollY / scrollable) * 100}%` : '0%';
+      });
+
+      [...document.querySelectorAll('.qa')].forEach(item => {
+        item.querySelector('.qa-q').addEventListener('click', () => item.classList.toggle('open'));
+      });
+    </script>
+  </body>
+</html>
